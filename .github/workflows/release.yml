@@ -1,0 +1,44 @@
+name: Build Release
+
+on:
+    workflow_dispatch:
+
+jobs:
+    release:
+        permissions:
+            contents: write
+            pull-requests: read
+        uses: Yueby/shared-workflows/.github/workflows/unity-package-release.yml@main
+        with:
+            package-name: ${{ vars.PACKAGE_NAME }}
+
+    notify-listing:
+        needs: release
+        runs-on: ubuntu-latest
+        steps:
+            - name: Check PAT
+              id: check_pat
+              continue-on-error: true
+              run: |
+                if [ -z "${{ secrets.PAT }}" ]; then
+                  echo "PAT is not configured, skipping workflow triggers"
+                  exit 1
+                fi
+
+            - name: Trigger Workflows
+              if: steps.check_pat.outcome == 'success'
+              uses: actions/github-script@v7
+              env:
+                PAT_CONFIG: ${{ secrets.PAT }}
+              with:
+                github-token: ${{ fromJson(secrets.PAT).token }}
+                script: |
+                  const config = JSON.parse(process.env.PAT_CONFIG);
+                  for (const target of config.targets) {
+                    await github.rest.actions.createWorkflowDispatch({
+                      owner: context.repo.owner,
+                      repo: target.repo,
+                      workflow_id: target.workflow,
+                      ref: 'main'
+                    });
+                  }
