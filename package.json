@@ -1,9 +1,9 @@
 {
-  "name": "com.template.package",
-  "displayName": "Template Package",
+  "name": "com.tools.quick-action",
+  "displayName": "\u25c6 Quick Action",
   "version": "1.0.0",
   "unity": "2022.3",
-  "description": "A template package for Unity package development",
+  "description": "You can press \"CTRL+Q\" to open Quick Action panel.",
   "author": {
     "name": "Your Name",
     "email": "you@email.com"
@@ -15,6 +15,5 @@
     "development"
   ],
   "unityRelease": "22f1",
-  "vpmDependencies": {
-  }
-} 
+  "vpmDependencies": {}
+}
