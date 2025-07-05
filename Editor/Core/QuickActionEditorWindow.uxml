@@ -1,0 +1,5 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Packages/com.tools.quick-action/Editor/Core/QuickActionEditorWindow.uss?fileID=7433441132597879392&amp;guid=aade4cd316184974e93fb694d524f130&amp;type=3#QuickActionEditorWindow" />
+    <ui:VisualElement name="Background" style="flex-grow: 1; opacity: 0; background-color: rgb(255, 255, 255);" />
+    <ui:VisualElement name="Center" style="flex-grow: 1; align-items: center; justify-content: center; align-self: center; width: 50px; height: 50px; display: flex; visibility: visible; overflow: visible; background-image: resource(&apos;Sprites/Circle&apos;); max-width: 50px; max-height: 50px; min-width: 50px; min-height: 50px; position: absolute; -unity-background-image-tint-color: rgba(255, 255, 255, 0.47); top: 150px; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; left: auto; rotate: 0;" />
+</ui:UXML>
