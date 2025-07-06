@@ -2,6 +2,8 @@
 
 一个强大的Unity编辑器扩展，提供圆形按钮界面来快速访问自定义操作。使用`Ctrl+Q`热键在鼠标位置显示径向菜单。
 
+![演示](https://raw.githubusercontent.com/Yueby/QuickAction/refs/heads/images/demo.gif)
+
 [English Documentation](README.md)
 
 ## 功能特性
@@ -18,7 +20,22 @@
 
 ### 1. 导入包
 
-将Quick Action包导入到您的Unity项目中。
+您可以通过以下方法之一将Quick Action包导入到Unity项目中：
+
+#### 方法1：Git URL（推荐）
+1. 打开Unity，转到 **Window > Package Manager**
+2. 点击左上角的 **+** 按钮
+3. 选择 **Add package from git URL...**
+4. 输入以下URL：
+   ```
+   https://github.com/Yueby/QuickAction.git
+   ```
+5. 点击 **Add** 并等待包导入完成
+
+#### 方法2：手动下载
+1. 从[GitHub仓库](https://github.com/Yueby/QuickAction)下载包
+2. 将文件解压到项目的 `Packages` 文件夹中
+3. Unity会自动检测并导入包
 
 ### 2. 创建您的第一个操作
 

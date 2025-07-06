@@ -2,6 +2,8 @@
 
 A powerful Unity Editor extension that provides a circular button interface for quick access to custom actions. Activate with `Ctrl+Q` hotkey to display a radial menu of available actions at your mouse position.
 
+![Demo](https://raw.githubusercontent.com/Yueby/QuickAction/refs/heads/images/demo.gif)
+
 [中文文档 (Chinese Documentation)](README_CN.md)
 
 ## Features
@@ -18,7 +20,22 @@ A powerful Unity Editor extension that provides a circular button interface for 
 
 ### 1. Import the Package
 
-Import the Quick Action package into your Unity project.
+You can import the Quick Action package into your Unity project using one of the following methods:
+
+#### Method 1: Git URL (Recommended)
+1. Open Unity and go to **Window > Package Manager**
+2. Click the **+** button in the top-left corner
+3. Select **Add package from git URL...**
+4. Enter the following URL:
+   ```
+   https://github.com/Yueby/QuickAction.git
+   ```
+5. Click **Add** and wait for the package to be imported
+
+#### Method 2: Manual Download
+1. Download the package from the [GitHub repository](https://github.com/Yueby/QuickAction)
+2. Extract the files to your project's `Packages` folder
+3. Unity will automatically detect and import the package
 
 ### 2. Create Your First Action
 
