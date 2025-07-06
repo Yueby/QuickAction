@@ -22,7 +22,10 @@
 
 您可以通过以下方法之一将Quick Action包导入到Unity项目中：
 
-#### 方法1：Git URL（推荐）
+#### 方法1：VRChat Creator Companion (VCC)
+对于VRChat开发者：**[通过VPM Listing添加到VCC](https://yueby.github.io/vpm-listing/)**
+
+#### 方法2：Git URL（推荐）
 1. 打开Unity，转到 **Window > Package Manager**
 2. 点击左上角的 **+** 按钮
 3. 选择 **Add package from git URL...**
@@ -32,7 +35,7 @@
    ```
 5. 点击 **Add** 并等待包导入完成
 
-#### 方法2：手动下载
+#### 方法3：手动下载
 1. 从[GitHub仓库](https://github.com/Yueby/QuickAction)下载包
 2. 将文件解压到项目的 `Packages` 文件夹中
 3. Unity会自动检测并导入包
@@ -214,6 +217,11 @@ public class HierarchicalActions
 - 每页最多8个按钮
 - 对具有大量操作的类别自动分页
 - 动态按钮分配（返回按钮、操作、下一页按钮）
+
+### 背景显示
+- 圆形界面会捕获其后面的背景内容，创造无缝的视觉效果
+- 背景不是透明的，而是使用界面位置处编辑器内容的截图
+- 这创造了透明的错觉，同时保持适当的UI渲染
 
 ## 最佳实践
 

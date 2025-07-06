@@ -22,7 +22,10 @@ A powerful Unity Editor extension that provides a circular button interface for 
 
 You can import the Quick Action package into your Unity project using one of the following methods:
 
-#### Method 1: Git URL (Recommended)
+#### Method 1: VRChat Creator Companion (VCC)
+For VRChat developers: **[Add to VCC via VPM Listing](https://yueby.github.io/vpm-listing/)**
+
+#### Method 2: Git URL (Recommended)
 1. Open Unity and go to **Window > Package Manager**
 2. Click the **+** button in the top-left corner
 3. Select **Add package from git URL...**
@@ -32,7 +35,7 @@ You can import the Quick Action package into your Unity project using one of the
    ```
 5. Click **Add** and wait for the package to be imported
 
-#### Method 2: Manual Download
+#### Method 3: Manual Download
 1. Download the package from the [GitHub repository](https://github.com/Yueby/QuickAction)
 2. Extract the files to your project's `Packages` folder
 3. Unity will automatically detect and import the package
@@ -214,6 +217,11 @@ public class HierarchicalActions
 - Maximum 8 buttons per page
 - Automatic pagination for categories with many actions
 - Dynamic button allocation (back button, actions, next page button)
+
+### Background Display
+- The circular interface captures the background content behind it to create a seamless visual effect
+- The background is not transparent but uses a screenshot of the editor content at the interface position
+- This creates the illusion of transparency while maintaining proper UI rendering
 
 ## Best Practices
 
