@@ -14,8 +14,13 @@ namespace Yueby.QuickActions
 
             Color[] pixels = UnityEditorInternal.InternalEditorUtility.ReadScreenPixel(position, width, height);
 
-            Texture2D texture = new Texture2D(width, height);
-            texture.SetPixels(pixels);
+            Texture2D texture = new Texture2D(width, height, TextureFormat.RGB24, false);
+            Color32[] pixels32 = new Color32[pixels.Length];
+            for (int i = 0; i < pixels.Length; i++)
+            {
+                pixels32[i] = pixels[i];
+            }
+            texture.SetPixels32(pixels32);
             texture.Apply();
             texture.name = "QuickActionBackground";
 

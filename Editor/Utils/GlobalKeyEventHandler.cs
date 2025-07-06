@@ -17,6 +17,11 @@ namespace Yueby.QuickActions
         public static event Action<Event> OnKeyEvent;
         
         /// <summary>
+        /// 鼠标事件回调
+        /// </summary>
+        public static event Action<Event> OnMouseEvent;
+        
+        /// <summary>
         /// 注册是否成功
         /// </summary>
         public static bool RegistrationSucceeded = false;
@@ -66,7 +71,20 @@ namespace Yueby.QuickActions
         /// </summary>
         private static void onKeyPressed()
         {
-            OnKeyEvent?.Invoke(Event.current);
+            var currentEvent = Event.current;
+            if (currentEvent != null)
+            {
+                // 处理键盘事件
+                if (currentEvent.type == EventType.KeyDown || currentEvent.type == EventType.KeyUp)
+                {
+                    OnKeyEvent?.Invoke(currentEvent);
+                }
+                // 处理鼠标事件
+                else if (currentEvent.type == EventType.MouseDown || currentEvent.type == EventType.MouseUp)
+                {
+                    OnMouseEvent?.Invoke(currentEvent);
+                }
+            }
         }
     }
 } 

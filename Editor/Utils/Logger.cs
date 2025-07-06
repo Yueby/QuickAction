@@ -42,7 +42,7 @@ namespace Yueby.QuickActions
         /// <summary>
         /// 日志前缀
         /// </summary>
-        private const string LOG_PREFIX = "[Yueby QuickAction]";
+        private const string LOG_PREFIX = "[QuickAction]";
 
         /// <summary>
         /// 记录调试日志

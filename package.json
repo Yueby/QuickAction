@@ -1,18 +1,20 @@
 {
-  "name": "com.tools.quick-action",
+  "name": "yueby.tools.quick-action",
   "displayName": "\u25c6 Quick Action",
   "version": "1.0.0",
   "unity": "2022.3",
   "description": "You can press \"CTRL+Q\" to open Quick Action panel.",
   "author": {
-    "name": "Your Name",
-    "email": "you@email.com"
+    "name": "Yueby",
+    "email": "yueby_sp@qq.com"
   },
   "keywords": [
-    "unity",
-    "package",
-    "template",
-    "development"
+    "quick action",
+    "Quick Action",
+    "QuickAction",
+    "quick",
+    "action",
+    "yueby"
   ],
   "unityRelease": "22f1",
   "vpmDependencies": {}
