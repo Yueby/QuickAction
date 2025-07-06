@@ -12,7 +12,7 @@ namespace Yueby.QuickActions
         private static readonly int _captureExtension = 4;
         private static readonly float _radius = 20f;
         private static readonly float _buttonRadius = 120f;
-        private static readonly float _buttonOpacity = 0.8f;
+        private static readonly float _buttonOpacity = 0.9f;
 
         private static Texture2D _texture = null;
 
