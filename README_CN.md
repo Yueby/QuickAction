@@ -13,6 +13,7 @@
 - **分层组织**: 将操作组织到类别和子类别中
 - **动态分页**: 自动处理大量操作的分页显示
 - **条件操作**: 根据当前上下文启用/禁用操作
+- **状态管理**: 可视化状态指示器（选中/未选中，可见/隐藏）
 - **优先级系统**: 通过优先级值控制操作显示顺序
 - **简易集成**: 基于特性的简单操作注册
 
@@ -106,6 +107,12 @@ public class MyActions
 - 返回`bool`
 - 无参数
 
+验证函数还可以使用以下方法控制操作的可见性和选中状态：
+- `QuickAction.SetVisible(path, bool)`: 显示/隐藏操作
+- `QuickAction.SetChecked(path, bool)`: 设置选中状态（显示勾选标记）
+- `QuickAction.GetVisible(path)`: 获取可见性状态
+- `QuickAction.GetChecked(path)`: 获取选中状态
+
 ## 示例
 
 ### 基础操作
@@ -159,7 +166,10 @@ public class ConditionalActions
     
     private static bool HasSelection()
     {
-        return Selection.gameObjects.Length > 0;
+        bool hasSelection = Selection.gameObjects.Length > 0;
+        // 只有在选中对象时才显示此操作
+        QuickAction.SetVisible("Selection/Delete Selected", hasSelection);
+        return hasSelection;
     }
     
     [QuickAction("Play Mode/Stop Play", "停止播放模式", ValidateFunction = "IsPlaying")]
@@ -171,6 +181,46 @@ public class ConditionalActions
     private static bool IsPlaying()
     {
         return EditorApplication.isPlaying;
+    }
+}
+```
+
+### 状态管理操作
+
+```csharp
+using UnityEngine;
+using UnityEditor;
+using Yueby.QuickActions;
+
+public class StateActions
+{
+    private static bool _featureEnabled = false;
+    
+    [QuickAction("Settings/Toggle Feature", "启用/禁用功能", ValidateFunction = "ValidateFeature")]
+    public static void ToggleFeature()
+    {
+        _featureEnabled = !_featureEnabled;
+        Debug.Log($"功能{(_featureEnabled ? "已启用" : "已禁用")}");
+    }
+    
+    private static bool ValidateFeature()
+    {
+        // 功能启用时显示勾选标记
+        QuickAction.SetChecked("Settings/Toggle Feature", _featureEnabled);
+        return true;
+    }
+    
+    [QuickAction("Tools/Debug Mode", "切换调试模式", ValidateFunction = "ValidateDebugMode")]
+    public static void ToggleDebugMode()
+    {
+        Debug.unityLogger.logEnabled = !Debug.unityLogger.logEnabled;
+    }
+    
+    private static bool ValidateDebugMode()
+    {
+        // 显示当前调试模式状态
+        QuickAction.SetChecked("Tools/Debug Mode", Debug.unityLogger.logEnabled);
+        return true;
     }
 }
 ```
@@ -217,6 +267,12 @@ public class HierarchicalActions
 - 每页最多8个按钮
 - 对具有大量操作的类别自动分页
 - 动态按钮分配（返回按钮、操作、下一页按钮）
+
+### 可视化状态指示器
+- **选中状态**: 显示彩色左边框表示"开启"状态
+- **未选中状态**: 显示灰色左边框并降低透明度表示"关闭"状态
+- **无状态**: 没有状态管理的操作不显示边框指示器
+- **隐藏操作**: 操作可以根据上下文动态隐藏
 
 ### 背景显示
 - 圆形界面会捕获其后面的背景内容，创造无缝的视觉效果

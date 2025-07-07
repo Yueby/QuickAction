@@ -223,16 +223,25 @@ namespace Yueby.QuickActions.Actions.Selections
         /// </summary>
         private static bool ValidateSkinnedMeshRendererSelected()
         {
-            if (Selection.gameObjects.Length == 0) return false;
-            
-            foreach (var obj in Selection.gameObjects)
+            bool hasSkinnedMeshRenderer = false;
+
+            if (Selection.gameObjects.Length > 0)
             {
-                if (obj.TryGetComponent<SkinnedMeshRenderer>(out _))
+                foreach (var obj in Selection.gameObjects)
                 {
-                    return true;
+                    if (obj.TryGetComponent<SkinnedMeshRenderer>(out _))
+                    {
+                        hasSkinnedMeshRenderer = true;
+                        break;
+                    }
                 }
             }
-            return false;
+
+            QuickAction.SetVisible("Selection/SkinnedMeshRenderer/Set Bounds To One", hasSkinnedMeshRenderer);
+            QuickAction.SetVisible("Selection/SkinnedMeshRenderer/Reset BlendShapes", hasSkinnedMeshRenderer);
+            QuickAction.SetVisible("Selection/SkinnedMeshRenderer/Paste BlendShapes", hasSkinnedMeshRenderer);
+
+            return hasSkinnedMeshRenderer;
         }
         
         /// <summary>
@@ -240,9 +249,14 @@ namespace Yueby.QuickActions.Actions.Selections
         /// </summary>
         private static bool ValidateSingleSkinnedMeshRendererSelected()
         {
-            return Selection.gameObjects.Length == 1 && 
+            bool hasSingleSkinnedMeshRenderer = Selection.gameObjects.Length == 1 &&
                    Selection.activeGameObject != null && 
                    Selection.activeGameObject.TryGetComponent<SkinnedMeshRenderer>(out _);
+
+            QuickAction.SetVisible("Selection/SkinnedMeshRenderer/Create Animation Clip", hasSingleSkinnedMeshRenderer);
+            QuickAction.SetVisible("Selection/SkinnedMeshRenderer/Copy BlendShapes", hasSingleSkinnedMeshRenderer);
+
+            return hasSingleSkinnedMeshRenderer;
         }
         
         #endregion

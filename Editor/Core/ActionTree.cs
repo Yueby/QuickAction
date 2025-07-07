@@ -39,12 +39,14 @@ namespace Yueby.QuickActions
         public string Name { get; set; }
         public string Path { get; set; }
         public ActionNodeType Type { get; set; }
-        public ActionRegistry.ActionInfo ActionInfo { get; set; }
+        public QuickAction.ActionInfo ActionInfo { get; set; }
         public List<ActionNode> Children { get; set; } = new List<ActionNode>();
         public ActionNode Parent { get; set; }
         public Texture2D Icon { get; set; }
         public int Priority { get; set; }
         public int CurrentPageIndex { get; set; } = 0; // Page index state for this node
+        public bool IsChecked { get; set; } = false; // 选中状态
+        public bool ShowCheckmark { get; set; } = false; // 是否显示checkmark
 
         public bool IsLeaf => Children.Count == 0;
         public bool IsRoot => Parent == null;
@@ -108,7 +110,7 @@ namespace Yueby.QuickActions
             };
 
             // Only get enabled actions
-            var allActions = ActionRegistry.GetEnabledActions();
+            var allActions = QuickAction.GetEnabledActions();
 
             // Build tree structure by path
             foreach (var kvp in allActions)
@@ -247,9 +249,20 @@ namespace Yueby.QuickActions
                 });
             }
 
-            // Get current page actions
+            // Get current page actions and update their checked status
             var actionsToShow = Mathf.Min(availableSlots, remainingActions);
             var availableActions = _currentNode.Children.Skip(startIndex).Take(actionsToShow).ToList();
+
+            // 更新每个动作的选中状态
+            foreach (var action in availableActions)
+            {
+                if (action.Type == ActionNodeType.Action && action.ActionInfo != null)
+                {
+                    var state = QuickAction.GetActionState(action.ActionInfo.Path);
+                    action.IsChecked = state.IsChecked;
+                    action.ShowCheckmark = state.ShowCheckmark;
+                }
+            }
 
             buttons.AddRange(availableActions);
 
@@ -349,7 +362,7 @@ namespace Yueby.QuickActions
             if (node?.Type != ActionNodeType.Action || node.ActionInfo == null)
                 return false;
 
-            return ActionRegistry.ExecuteAction(node.ActionInfo.Path);
+            return QuickAction.ExecuteAction(node.ActionInfo.Path);
         }
 
         /// <summary>

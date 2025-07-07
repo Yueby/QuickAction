@@ -183,7 +183,18 @@ namespace Yueby.QuickActions.Actions.Selections
         /// </summary>
         private static bool ValidateGameObjectSelected()
         {
-            return Selection.activeGameObject != null;
+            bool hasGameObjectSelected = Selection.activeGameObject != null;
+
+            QuickAction.SetVisible("Selection/Transform/Reset Position", hasGameObjectSelected);
+            QuickAction.SetVisible("Selection/Transform/Reset Rotation", hasGameObjectSelected);
+            QuickAction.SetVisible("Selection/Transform/Reset Scale", hasGameObjectSelected);
+            QuickAction.SetVisible("Selection/Transform/Reset All", hasGameObjectSelected);
+            QuickAction.SetVisible("Selection/Transform/Paste Transform", hasGameObjectSelected);
+            QuickAction.SetVisible("Selection/Transform/Snap to Ground", hasGameObjectSelected);
+            QuickAction.SetVisible("Selection/Transform/Randomize Rotation", hasGameObjectSelected);
+            QuickAction.SetVisible("Selection/Transform/Align to View", hasGameObjectSelected);
+
+            return hasGameObjectSelected;
         }
         
         /// <summary>
@@ -191,7 +202,9 @@ namespace Yueby.QuickActions.Actions.Selections
         /// </summary>
         private static bool ValidateSingleGameObjectSelected()
         {
-            return Selection.activeGameObject != null && Selection.gameObjects.Length == 1;
+            bool hasSingleGameObjectSelected = Selection.activeGameObject != null && Selection.gameObjects.Length == 1;
+            QuickAction.SetVisible("Selection/Transform/Copy Transform", hasSingleGameObjectSelected);
+            return hasSingleGameObjectSelected;
         }
         
         #endregion

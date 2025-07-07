@@ -8,6 +8,9 @@ namespace Yueby.QuickActions.Actions
     /// </summary>
     public static class WindowAction
     {
+        private static bool _gameViewMaximized = false;
+        private static bool _sceneViewMaximized = false;
+
         [QuickAction("Editor/Window/Maximize Game View", "Maximize/Restore Game View", Priority = -940, ValidateFunction = nameof(ValidateGameViewExists))]
         public static void MaximizeGameView()
         {
@@ -15,6 +18,7 @@ namespace Yueby.QuickActions.Actions
             if (gameView != null)
             {
                 gameView.maximized = !gameView.maximized;
+                _gameViewMaximized = gameView.maximized; // 更新本地状态
                 Logger.Info($"Game view {(gameView.maximized ? "maximized" : "restored")}");
             }
         }
@@ -26,35 +30,8 @@ namespace Yueby.QuickActions.Actions
             if (sceneView != null)
             {
                 sceneView.maximized = !sceneView.maximized;
+                _sceneViewMaximized = sceneView.maximized; // 更新本地状态
                 Logger.Info($"Scene view {(sceneView.maximized ? "maximized" : "restored")}");
-            }
-        }
-
-        [QuickAction("Editor/Window/Restore Default Layout", "Restore Default Layout", Priority = -939)]
-        public static void RestoreDefaultLayout()
-        {
-            // Use reflection to call internal method to restore default layout
-            var windowLayoutType = typeof(EditorWindow).Assembly.GetType("UnityEditor.WindowLayout");
-            if (windowLayoutType != null)
-            {
-                var method = windowLayoutType.GetMethod("RevertFactorySettings", 
-                    System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic);
-                if (method != null)
-                {
-                    method.Invoke(null, null);
-                    Logger.Info("Restored default layout");
-                }
-                else
-                {
-                    // Backup method: try to load default layout
-                    var loadMethod = windowLayoutType.GetMethod("LoadWindowLayout", 
-                        System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic);
-                    if (loadMethod != null)
-                    {
-                        loadMethod.Invoke(null, new object[] { null, false });
-                        Logger.Info("Loaded default layout");
-                    }
-                }
             }
         }
 
@@ -67,7 +44,17 @@ namespace Yueby.QuickActions.Actions
         {
             var gameViewType = typeof(EditorWindow).Assembly.GetType("UnityEditor.GameView");
             var gameViews = Resources.FindObjectsOfTypeAll(gameViewType);
-            return gameViews != null && gameViews.Length > 0;
+            bool hasGameView = gameViews != null && gameViews.Length > 0;
+
+            QuickAction.SetVisible("Editor/Window/Maximize Game View", hasGameView);
+
+            // 使用本地状态变量
+            if (hasGameView)
+            {
+                QuickAction.SetChecked("Editor/Window/Maximize Game View", _gameViewMaximized);
+            }
+
+            return hasGameView;
         }
 
         /// <summary>
@@ -75,9 +62,18 @@ namespace Yueby.QuickActions.Actions
         /// </summary>
         private static bool ValidateSceneViewExists()
         {
-            return SceneView.lastActiveSceneView != null;
+            bool hasSceneView = SceneView.lastActiveSceneView != null;
+            QuickAction.SetVisible("Editor/Window/Maximize Scene View", hasSceneView);
+
+            // 使用本地状态变量
+            if (hasSceneView)
+            {
+                QuickAction.SetChecked("Editor/Window/Maximize Scene View", _sceneViewMaximized);
+            }
+
+            return hasSceneView;
         }
 
         #endregion
     }
-} 
+}

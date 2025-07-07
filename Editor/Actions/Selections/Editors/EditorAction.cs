@@ -37,9 +37,9 @@ namespace Yueby.QuickActions.Actions
         [QuickAction("Editor/Debug Actions", "Debug: Show All Registered Actions", Priority = 1000)]
         public static void DebugActions()
         {
-            ActionRegistry.ForceInitialize();
-            var allActions = ActionRegistry.GetAllActions();
-            var enabledActions = ActionRegistry.GetEnabledActions();
+            QuickAction.ForceInitialize();
+            var allActions = QuickAction.GetAllActions();
+            var enabledActions = QuickAction.GetEnabledActions();
 
             Logger.Info($"Total registered actions: {allActions.Count}");
             Logger.Info($"Enabled actions: {enabledActions.Count}");

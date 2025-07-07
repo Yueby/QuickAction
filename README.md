@@ -13,6 +13,7 @@ A powerful Unity Editor extension that provides a circular button interface for 
 - **Hierarchical Organization**: Organize actions into categories and subcategories
 - **Dynamic Pagination**: Automatically handles large numbers of actions with pagination
 - **Conditional Actions**: Enable/disable actions based on current context
+- **State Management**: Visual state indicators (checked/unchecked, visible/hidden)
 - **Priority System**: Control action display order with priority values
 - **Easy Integration**: Simple attribute-based action registration
 
@@ -106,6 +107,12 @@ Validation functions must be:
 - Return `bool`
 - Have no parameters
 
+Validation functions can also control action visibility and checked state using:
+- `QuickAction.SetVisible(path, bool)`: Show/hide actions
+- `QuickAction.SetChecked(path, bool)`: Set checked state (shows checkmark)
+- `QuickAction.GetVisible(path)`: Get visibility state
+- `QuickAction.GetChecked(path)`: Get checked state
+
 ## Examples
 
 ### Basic Actions
@@ -159,7 +166,10 @@ public class ConditionalActions
     
     private static bool HasSelection()
     {
-        return Selection.gameObjects.Length > 0;
+        bool hasSelection = Selection.gameObjects.Length > 0;
+        // Only show this action when objects are selected
+        QuickAction.SetVisible("Selection/Delete Selected", hasSelection);
+        return hasSelection;
     }
     
     [QuickAction("Play Mode/Stop Play", "Stop play mode", ValidateFunction = "IsPlaying")]
@@ -171,6 +181,46 @@ public class ConditionalActions
     private static bool IsPlaying()
     {
         return EditorApplication.isPlaying;
+    }
+}
+```
+
+### State Management Actions
+
+```csharp
+using UnityEngine;
+using UnityEditor;
+using Yueby.QuickActions;
+
+public class StateActions
+{
+    private static bool _featureEnabled = false;
+    
+    [QuickAction("Settings/Toggle Feature", "Enable/disable a feature", ValidateFunction = "ValidateFeature")]
+    public static void ToggleFeature()
+    {
+        _featureEnabled = !_featureEnabled;
+        Debug.Log($"Feature {(_featureEnabled ? "enabled" : "disabled")}");
+    }
+    
+    private static bool ValidateFeature()
+    {
+        // Show checkmark when feature is enabled
+        QuickAction.SetChecked("Settings/Toggle Feature", _featureEnabled);
+        return true;
+    }
+    
+    [QuickAction("Tools/Debug Mode", "Toggle debug mode", ValidateFunction = "ValidateDebugMode")]
+    public static void ToggleDebugMode()
+    {
+        Debug.unityLogger.logEnabled = !Debug.unityLogger.logEnabled;
+    }
+    
+    private static bool ValidateDebugMode()
+    {
+        // Show current debug mode state
+        QuickAction.SetChecked("Tools/Debug Mode", Debug.unityLogger.logEnabled);
+        return true;
     }
 }
 ```
@@ -217,6 +267,12 @@ public class HierarchicalActions
 - Maximum 8 buttons per page
 - Automatic pagination for categories with many actions
 - Dynamic button allocation (back button, actions, next page button)
+
+### Visual State Indicators
+- **Checked Actions**: Display a colored left border to indicate "on" state
+- **Unchecked Actions**: Display a gray left border with reduced opacity for "off" state
+- **No State**: Actions without state management don't show border indicators
+- **Hidden Actions**: Actions can be dynamically hidden based on context
 
 ### Background Display
 - The circular interface captures the background content behind it to create a seamless visual effect

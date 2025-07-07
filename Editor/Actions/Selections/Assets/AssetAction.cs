@@ -98,7 +98,16 @@ namespace Yueby.QuickActions.Actions.Selections
         /// </summary>
         private static bool ValidateAssetSelected()
         {
-            return Selection.activeObject != null && AssetDatabase.Contains(Selection.activeObject);
+            bool hasAssetSelected = Selection.activeObject != null && AssetDatabase.Contains(Selection.activeObject);
+
+            // 设置所有Asset相关动作的可见性
+            QuickAction.SetVisible("Selection/Duplicate Asset", hasAssetSelected);
+            QuickAction.SetVisible("Selection/Delete Asset", hasAssetSelected);
+            QuickAction.SetVisible("Selection/Show in Explorer", hasAssetSelected);
+            QuickAction.SetVisible("Selection/Copy Path", hasAssetSelected);
+            QuickAction.SetVisible("Selection/Copy GUID", hasAssetSelected);
+
+            return hasAssetSelected;
         }
         
         #endregion

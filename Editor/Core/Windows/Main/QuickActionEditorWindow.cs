@@ -1,8 +1,9 @@
-using Algolia.Search.Models.Common;
+
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
+using Yueby.QuickActions.UIElements;
 
 namespace Yueby.QuickActions
 {
@@ -12,7 +13,6 @@ namespace Yueby.QuickActions
         private static readonly int _captureExtension = 4;
         private static readonly float _radius = 20f;
         private static readonly float _buttonRadius = 120f;
-        private static readonly float _buttonOpacity = 0.9f;
 
         private static Texture2D _texture = null;
 
@@ -24,7 +24,7 @@ namespace Yueby.QuickActions
 
         private bool _isAllowSelect = false;
         private int _selectedButtonIndex = -1; // Current selected button index
-        private Button[] _circularButtons; // Store references to all circular buttons
+        private ActionButton[] _circularButtons; // Store references to all circular buttons
 
         // Action system related
         private ActionTree _actionTree;
@@ -326,7 +326,7 @@ namespace Yueby.QuickActions
             int buttonCount = _currentButtons.Count;
             float angleStep = buttonCount > 0 ? 360f / buttonCount : 0f;
 
-            _circularButtons = new Button[buttonCount];
+            _circularButtons = new ActionButton[buttonCount];
 
             for (int i = 0; i < buttonCount; i++)
             {
@@ -336,22 +336,36 @@ namespace Yueby.QuickActions
 
                 float centerX = center.x + _buttonRadius * Mathf.Sin(angleRad);
                 float centerY = center.y - _buttonRadius * Mathf.Cos(angleRad);
-                Button button = new Button();
-                button.text = actionNode.Name;
-                button.name = $"action-button-{i}";
-                button.tooltip = actionNode.ActionInfo?.Description ?? "";
-                button.style.position = Position.Absolute;
-                button.style.opacity = _buttonOpacity;
+                ActionButton actionButton = new ActionButton();
 
-                button.RegisterCallback<GeometryChangedEvent>(evt =>
+                // 设置按钮文本和状态
+                actionButton.SetText(actionNode.Name);
+
+                // 设置checkmark状态（只有Action类型且ShowCheckmark为true才显示）
+                if (actionNode.Type == ActionNodeType.Action && actionNode.ShowCheckmark)
+                {
+                    actionButton.SetShowCheckmark(true);
+                    actionButton.SetChecked(actionNode.IsChecked);
+                }
+                else
+                {
+                    actionButton.SetShowCheckmark(false);
+                }
+
+                actionButton.name = $"action-button-{i}";
+                actionButton.Button.tooltip = actionNode.ActionInfo?.Description ?? "";
+
+                actionButton.style.transitionDuration = new StyleList<TimeValue>(new List<TimeValue> { new TimeValue(0.2f) });
+
+                actionButton.Button.RegisterCallback<GeometryChangedEvent>(evt =>
                 {
                     var rect = evt.newRect;
-                    button.style.left = centerX - rect.width * 0.5f;
-                    button.style.top = centerY - rect.height * 0.5f;
+                    actionButton.style.left = centerX - rect.width * 0.5f;
+                    actionButton.style.top = centerY - rect.height * 0.5f;
                 });
 
-                _circularButtons[i] = button;
-                _root.Add(button);
+                _circularButtons[i] = actionButton;
+                _root.Add(actionButton);
             }
         }
 
@@ -375,8 +389,7 @@ namespace Yueby.QuickActions
                 if (_selectedButtonIndex >= 0 && _selectedButtonIndex < _circularButtons.Length)
                 {
                     var selectedButton = _circularButtons[_selectedButtonIndex];
-                    selectedButton.style.backgroundColor = new StyleColor(new Color(0.2f, 0.5f, 0.8f, 1f));
-                    selectedButton.style.opacity = _buttonOpacity;
+                    selectedButton.Button.style.backgroundColor = new StyleColor(new Color(0.2f, 0.5f, 0.8f, 1f));
 
                     // Bring selected button to front for display
                     selectedButton.BringToFront();
@@ -389,8 +402,7 @@ namespace Yueby.QuickActions
             if (_circularButtons != null && _selectedButtonIndex >= 0 && _selectedButtonIndex < _circularButtons.Length)
             {
                 var previousButton = _circularButtons[_selectedButtonIndex];
-                previousButton.style.backgroundColor = StyleKeyword.Null;
-                previousButton.style.opacity = _buttonOpacity;
+                previousButton.Button.style.backgroundColor = StyleKeyword.Null;
             }
             _selectedButtonIndex = -1;
         }

@@ -25,8 +25,12 @@ namespace Yueby.QuickActions
         public int Priority { get; set; } = 0;
 
         /// <summary>
-        /// Validation function name, used to check if enabled
+        /// Validation function name, used to set action state
         /// Validation function must be a static method returning bool
+        /// The return value determines if the action is enabled
+        /// Within the validation function, you can call:
+        /// - QuickAction.SetVisible(path, bool) to control visibility
+        /// - QuickAction.SetChecked(path, bool) to control checked state
         /// </summary>
         public string ValidateFunction { get; set; }
 

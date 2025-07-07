@@ -74,7 +74,13 @@ namespace Yueby.QuickActions.Actions.Selections
         /// </summary>
         private static bool ValidateGameObjectSelected()
         {
-            return Selection.activeGameObject != null;
+            bool hasGameObjectSelected = Selection.activeGameObject != null;
+
+            QuickAction.SetVisible("Selection/Duplicate", hasGameObjectSelected);
+            QuickAction.SetVisible("Selection/Delete", hasGameObjectSelected);
+            QuickAction.SetVisible("Selection/Focus", hasGameObjectSelected);
+
+            return hasGameObjectSelected;
         }
         
         /// <summary>
@@ -82,7 +88,9 @@ namespace Yueby.QuickActions.Actions.Selections
         /// </summary>
         private static bool ValidateGameObjectHasParent()
         {
-            return Selection.activeGameObject != null && Selection.activeGameObject.transform.parent != null;
+            bool hasParent = Selection.activeGameObject != null && Selection.activeGameObject.transform.parent != null;
+            QuickAction.SetVisible("Selection/Select Parent", hasParent);
+            return hasParent;
         }
         
         /// <summary>
@@ -90,7 +98,9 @@ namespace Yueby.QuickActions.Actions.Selections
         /// </summary>
         private static bool ValidateGameObjectHasChildren()
         {
-            return Selection.activeGameObject != null && Selection.activeGameObject.transform.childCount > 0;
+            bool hasChildren = Selection.activeGameObject != null && Selection.activeGameObject.transform.childCount > 0;
+            QuickAction.SetVisible("Selection/Select Children", hasChildren);
+            return hasChildren;
         }
         
         #endregion

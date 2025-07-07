@@ -54,7 +54,12 @@ namespace Yueby.QuickActions.Actions
         /// </summary>
         private static bool ValidateGameObjectSelected()
         {
-            return Selection.activeGameObject != null;
+            bool hasGameObjectSelected = Selection.activeGameObject != null;
+
+            QuickAction.SetVisible("Editor/Scene/Align View to Selected", hasGameObjectSelected);
+            QuickAction.SetVisible("Editor/Scene/Align Selected to View", hasGameObjectSelected);
+
+            return hasGameObjectSelected;
         }
 
         #endregion
