@@ -1,4 +1,4 @@
-# Quick Action System
+# Quick Action
 
 A powerful Unity Editor extension that provides a circular button interface for quick access to custom actions. Activate with `Ctrl+Q` hotkey to display a radial menu of available actions at your mouse position.
 
