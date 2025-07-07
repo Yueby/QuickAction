@@ -2,7 +2,8 @@
 
 A powerful Unity Editor extension that provides a circular button interface for quick access to custom actions. Activate with `Ctrl+Q` hotkey to display a radial menu of available actions at your mouse position.
 
-![Demo](https://raw.githubusercontent.com/Yueby/QuickAction/refs/heads/images/demo.gif)
+![Demo](https://raw.githubusercontent.com/Yueby/QuickAction/refs/heads/images/action-demo.gif)
+![State Management Demo](https://raw.githubusercontent.com/Yueby/QuickAction/refs/heads/images/checked-demo.gif)
 
 [中文文档 (Chinese Documentation)](README_CN.md)
 

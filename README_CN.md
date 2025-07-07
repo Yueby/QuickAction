@@ -2,7 +2,8 @@
 
 一个强大的Unity编辑器扩展，提供圆形按钮界面来快速访问自定义操作。使用`Ctrl+Q`热键在鼠标位置显示径向菜单。
 
-![演示](https://raw.githubusercontent.com/Yueby/QuickAction/refs/heads/images/demo.gif)
+![演示](https://raw.githubusercontent.com/Yueby/QuickAction/refs/heads/images/action-demo.gif)
+![状态管理演示](https://raw.githubusercontent.com/Yueby/QuickAction/refs/heads/images/checked-demo.gif)
 
 [English Documentation](README.md)
 
