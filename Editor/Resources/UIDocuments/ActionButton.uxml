@@ -1,7 +1,7 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" yueby="Yueby.QuickActions.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../../../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="project://database/Packages/yueby.tools.quick-action/Editor/Resources/UIDocuments/ActionButton.uss?fileID=7433441132597879392&amp;guid=4825b2d769d57d64cb94e18cfb97ac33&amp;type=3#ActionButton" />
     <ui:Button parse-escape-sequences="true" display-tooltip-when-elided="true" style="position: absolute; flex-direction: row; margin-top: initial; margin-right: initial; margin-bottom: initial; margin-left: initial; padding-top: initial; padding-right: initial; padding-bottom: initial; padding-left: initial; transition-property: background-color; transition-duration: 0.3s;">
-        <ui:VisualElement name="check-mark" style="flex-grow: 1; position: relative; width: 6px; height: 100%; left: 0; top: 0; display: flex; transition-property: opacity; transition-duration: 0.3s; opacity: 1; background-color: rgb(64, 160, 254); padding-right: 0; margin-right: 2px;" />
+        <ui:VisualElement name="check-mark" style="flex-grow: 1; position: relative; width: 6px; height: 100%; left: 0; top: 0; display: flex; transition-property: opacity; transition-duration: 0.3s; opacity: 1; padding-right: 0; margin-right: 2px;" />
         <ui:Label tabindex="-1" text="Label" parse-escape-sequences="true" display-tooltip-when-elided="true" style="position: relative;" />
     </ui:Button>
 </ui:UXML>

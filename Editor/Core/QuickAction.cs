@@ -12,6 +12,7 @@ namespace Yueby.QuickActions
         private static bool _isCtrlQPressed = false;
         private static ActionTree _actionTree;
         private static QuickActionEditorWindow _currentWindow;
+        private static EditorWindow _lastMouseOverWindow;
 
         // ActionRegistry功能整合
         private static Dictionary<string, ActionInfo> _registeredActions = new Dictionary<string, ActionInfo>();
@@ -19,6 +20,8 @@ namespace Yueby.QuickActions
 
         // 动作状态管理
         private static Dictionary<string, ActionState> _actionStates = new Dictionary<string, ActionState>();
+
+        public static EditorWindow LastMouseOverWindow => _lastMouseOverWindow;
 
         /// <summary>
         /// 动作状态信息
@@ -302,6 +305,20 @@ namespace Yueby.QuickActions
             InitializeActionRegistry();
         }
 
+        /// <summary>
+        /// 强制刷新所有action的validation状态
+        /// </summary>
+        public static void RefreshValidationStates()
+        {
+            if (!_initialized) InitializeActionRegistry();
+
+            foreach (var kvp in _registeredActions)
+            {
+                var actionInfo = kvp.Value;
+                UpdateActionState(actionInfo);
+            }
+        }
+
         #region 动作状态设置方法
 
         /// <summary>
@@ -368,7 +385,7 @@ namespace Yueby.QuickActions
                     if (evt.control && evt.keyCode == KeyCode.Q && !_isCtrlQPressed)
                     {
                         _isCtrlQPressed = true;
-
+                        _lastMouseOverWindow = EditorWindow.mouseOverWindow;
                         OnKeyDown(evt);
                     }
                     break;
@@ -397,15 +414,27 @@ namespace Yueby.QuickActions
         {
             if (evt == null || _currentWindow == null) return;
 
-            // Only handle left mouse button down events
-            if (evt.type == EventType.MouseDown && evt.button == 0)
+            if (evt.type == EventType.MouseDown)
             {
-                _currentWindow.OnMouseClick(evt);
+                if (evt.button == 0) // Left mouse button
+                {
+                    _currentWindow.OnLeftMouseClick(evt);
+                }
+                else if (evt.button == 1) // Right mouse button
+                {
+                    _currentWindow.OnRightMouseClick(evt);
+                }
             }
         }
 
         private static void OnKeyDown(Event evt)
         {
+            if (EditorWindow.HasOpenInstances<QuickActionEditorWindow>())
+            {
+                Logger.Info("Find accidental QuickAction window, close it");
+                EditorWindow.GetWindow<QuickActionEditorWindow>().Close();
+            }
+
             var mousePosition = GUIUtility.GUIToScreenPoint(evt.mousePosition);
 
             _actionTree.Refresh();
@@ -420,6 +449,22 @@ namespace Yueby.QuickActions
                 _currentWindow.Close();
                 _currentWindow = null;
             }
+        }
+
+        /// <summary>
+        /// 检查上一次焦点窗口是否为指定类型
+        /// </summary>
+        public static bool IsMouseOverWindow<T>() where T : EditorWindow
+        {
+            return _lastMouseOverWindow is T;
+        }
+
+        /// <summary>
+        /// 获取上一次焦点窗口作为指定类型
+        /// </summary>
+        public static T GetMouseOverWindow<T>() where T : EditorWindow
+        {
+            return _lastMouseOverWindow as T;
         }
     }
 }

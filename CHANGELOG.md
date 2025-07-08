@@ -4,6 +4,38 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.0.3] - 2025-07-08
+### Added
+- Scene View integration with context-aware actions
+- SceneView orthographic/perspective toggle with visual state indicator
+- Six-directional view controls (Top, Right, Back, Bottom, Front, Left) 
+- Mouse-over window detection system replacing focus-based detection
+- Right-click to cancel selection and close window functionality
+- Inner circle sector navigation (back/next page) with visual feedback
+- Unified selection management system with area switching support
+
+### Changed
+- Switched from last focused window to mouse-over window detection for better UX
+- Enhanced OnGUI performance by only updating on mouse position changes
+- Improved SceneView direction setting to match Unity's built-in Orientation overlay behavior
+- Reorganized view action priorities (Top > Right > Back > Bottom > Front > Left)
+- Actions now remain visible after execution for continuous operations
+- Left-click executes action and clears selection for next mouse movement
+- Right-click cancels selection and closes window
+
+### Fixed
+- SceneView actions now operate on the correct window under mouse cursor
+- View direction changes maintain current pivot and camera distance
+- Eliminated unnecessary forced orthographic mode switching
+- Improved visual feedback consistency across all selection areas
+
+### Technical Improvements
+- Refactored mouse event handling with separate left/right click methods
+- Enhanced SelectionManager with state preservation and restoration
+- Optimized HandleMousePositionChange for better performance
+- Added comprehensive SceneView validation functions
+- Implemented proper cleanup of selection states
+
 ## [1.0.2] - 2025-07-08
 ### Added
 - State management system with visual indicators

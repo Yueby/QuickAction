@@ -2,8 +2,7 @@
 
 A powerful Unity Editor extension that provides a circular button interface for quick access to custom actions. Activate with `Ctrl+Q` hotkey to display a radial menu of available actions at your mouse position.
 
-![Demo](https://raw.githubusercontent.com/Yueby/QuickAction/refs/heads/images/action-demo.gif)
-![State Management Demo](https://raw.githubusercontent.com/Yueby/QuickAction/refs/heads/images/checked-demo.gif)
+![Basic Preview](https://raw.githubusercontent.com/Yueby/QuickAction/refs/heads/images/1preview.gif)
 
 [中文文档 (Chinese Documentation)](README_CN.md)
 
@@ -188,6 +187,8 @@ public class ConditionalActions
 
 ### State Management Actions
 
+![State Management Demo](https://raw.githubusercontent.com/Yueby/QuickAction/refs/heads/images/3checked.gif)
+
 ```csharp
 using UnityEngine;
 using UnityEditor;
@@ -228,6 +229,8 @@ public class StateActions
 
 ### Hierarchical Organization
 
+![Category Demo](https://raw.githubusercontent.com/Yueby/QuickAction/refs/heads/images/2category.gif)
+
 ```csharp
 using UnityEngine;
 using UnityEditor;
@@ -256,6 +259,15 @@ public class HierarchicalActions
 }
 ```
 
+## SceneView Integration
+
+![SceneView Features Demo](https://raw.githubusercontent.com/Yueby/QuickAction/refs/heads/images/5sceneview-feature.gif)
+
+Quick Action provides specialized SceneView integration features, including:
+- **View Switching**: Quickly switch to front/back/left/right/top/bottom views
+- **Orthographic/Perspective Mode**: Toggle SceneView projection mode
+- **Context Awareness**: Only show relevant actions when SceneView window is active
+
 ## Interface Usage
 
 ### Navigation
@@ -263,6 +275,8 @@ public class HierarchicalActions
 - **Action Buttons**: Hover to select, release hotkey or click to execute
 - **Back Button (↑)**: Return to previous category or first page
 - **Next Page (←)**: Navigate to next page when available
+
+![Back and Next Page Demo](https://raw.githubusercontent.com/Yueby/QuickAction/refs/heads/images/4back%26nextpage.gif)
 
 ### Pagination
 - Maximum 8 buttons per page

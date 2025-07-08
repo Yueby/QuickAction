@@ -2,8 +2,7 @@
 
 一个强大的Unity编辑器扩展，提供圆形按钮界面来快速访问自定义操作。使用`Ctrl+Q`热键在鼠标位置显示径向菜单。
 
-![演示](https://raw.githubusercontent.com/Yueby/QuickAction/refs/heads/images/action-demo.gif)
-![状态管理演示](https://raw.githubusercontent.com/Yueby/QuickAction/refs/heads/images/checked-demo.gif)
+![基础预览](https://raw.githubusercontent.com/Yueby/QuickAction/refs/heads/images/1preview.gif)
 
 [English Documentation](README.md)
 
@@ -188,6 +187,8 @@ public class ConditionalActions
 
 ### 状态管理操作
 
+![状态管理演示](https://raw.githubusercontent.com/Yueby/QuickAction/refs/heads/images/3checked.gif)
+
 ```csharp
 using UnityEngine;
 using UnityEditor;
@@ -228,6 +229,8 @@ public class StateActions
 
 ### 分层组织
 
+![分类演示](https://raw.githubusercontent.com/Yueby/QuickAction/refs/heads/images/2category.gif)
+
 ```csharp
 using UnityEngine;
 using UnityEditor;
@@ -256,6 +259,15 @@ public class HierarchicalActions
 }
 ```
 
+## SceneView集成
+
+![SceneView功能演示](https://raw.githubusercontent.com/Yueby/QuickAction/refs/heads/images/5sceneview-feature.gif)
+
+Quick Action提供了专门的SceneView集成功能，包括：
+- **视图切换**: 快速切换到前/后/左/右/顶/底视图
+- **正交/透视模式**: 切换SceneView的投影模式
+- **上下文感知**: 只有在SceneView窗口活跃时才显示相关操作
+
 ## 界面使用
 
 ### 导航
@@ -263,6 +275,8 @@ public class HierarchicalActions
 - **操作按钮**: 悬停选择，释放热键或点击执行
 - **返回按钮(↑)**: 返回上一级类别或第一页
 - **下一页按钮(←)**: 当有更多页面时导航到下一页
+
+![返回和下一页演示](https://raw.githubusercontent.com/Yueby/QuickAction/refs/heads/images/4back%26nextpage.gif)
 
 ### 分页
 - 每页最多8个按钮

@@ -18,17 +18,7 @@ namespace Yueby.QuickActions
         /// <summary>
         /// Action node (executable command)
         /// </summary>
-        Action,
-
-        /// <summary>
-        /// Back to parent node
-        /// </summary>
-        Back,
-
-        /// <summary>
-        /// Next page node
-        /// </summary>
-        NextPage
+        Action
     }
 
     /// <summary>
@@ -208,49 +198,17 @@ namespace Yueby.QuickActions
                 pageIndex = _currentNode.CurrentPageIndex;
             }
 
-            // Dynamically calculate current page button distribution
-            bool needBackButton = !IsAtRoot || pageIndex > 0;
-            int availableSlots = MaxButtonsPerPage;
-            
-            // Reserve space for back button
-            if (needBackButton)
-            {
-                availableSlots--;
-            }
+            // Calculate start index for current page
+            var startIndex = pageIndex * MaxButtonsPerPage;
 
-            // Calculate action start index and remaining count
-            var startIndex = CalculateStartIndex(pageIndex, needBackButton);
-            
             // Return empty list if start index is out of range
             if (startIndex >= totalActions)
             {
                 return buttons;
             }
 
-            var remainingActions = totalActions - startIndex;
-            
-            // Check if next page button is needed
-            bool needNextPageButton = remainingActions > availableSlots;
-            
-            // Reduce one more slot if next page button is needed
-            if (needNextPageButton)
-            {
-                availableSlots--;
-            }
-
-            // Add back button
-            if (needBackButton)
-            {
-                buttons.Add(new ActionNode
-                {
-                    Name = "↑",
-                    Type = ActionNodeType.Back,
-                    Priority = -1000 // Ensure back button is at the front
-                });
-            }
-
             // Get current page actions and update their checked status
-            var actionsToShow = Mathf.Min(availableSlots, remainingActions);
+            var actionsToShow = Mathf.Min(MaxButtonsPerPage, totalActions - startIndex);
             var availableActions = _currentNode.Children.Skip(startIndex).Take(actionsToShow).ToList();
 
             // 更新每个动作的选中状态
@@ -266,61 +224,7 @@ namespace Yueby.QuickActions
 
             buttons.AddRange(availableActions);
 
-            // Add next page button
-            if (needNextPageButton)
-            {
-                buttons.Add(new ActionNode
-                {
-                    Name = "←",
-                    Type = ActionNodeType.NextPage,
-                    Priority = 1000 // Ensure next page button is at the end
-                });
-            }
-
             return buttons;
-        }
-
-        /// <summary>
-        /// Calculate start index for specified page
-        /// </summary>
-        private int CalculateStartIndex(int targetPageIndex, bool needBackButton)
-        {
-            if (targetPageIndex == 0)
-            {
-                return 0;
-            }
-
-            int startIndex = 0;
-            
-            // Calculate page by page, considering dynamic slot allocation for each page
-            for (int page = 0; page < targetPageIndex; page++)
-            {
-                int availableSlots = MaxButtonsPerPage;
-                
-                // Reserve space for back button
-                if (needBackButton)
-                {
-                    availableSlots--;
-                }
-                
-                // Calculate remaining actions for this page
-                var remainingActions = _currentNode.Children.Count - startIndex;
-                
-                // Check if next page button is needed
-                bool needNextPageButton = remainingActions > availableSlots;
-                
-                // Reduce one more slot if next page button is needed
-                if (needNextPageButton)
-                {
-                    availableSlots--;
-                }
-                
-                // Actual number of actions displayed on this page
-                var actionsInThisPage = Mathf.Min(availableSlots, remainingActions);
-                startIndex += actionsInThisPage;
-            }
-            
-            return startIndex;
         }
 
         /// <summary>
@@ -342,13 +246,6 @@ namespace Yueby.QuickActions
                     // Execution logic should be handled by caller
                     return true;
 
-                case ActionNodeType.Back:
-                    return NavigateBack();
-
-                case ActionNodeType.NextPage:
-                    // Next page logic is handled by UI
-                    return true;
-
                 default:
                     return false;
             }
@@ -362,7 +259,15 @@ namespace Yueby.QuickActions
             if (node?.Type != ActionNodeType.Action || node.ActionInfo == null)
                 return false;
 
-            return QuickAction.ExecuteAction(node.ActionInfo.Path);
+            var result = QuickAction.ExecuteAction(node.ActionInfo.Path);
+
+            // 执行action后刷新所有validation状态
+            if (result)
+            {
+                QuickAction.RefreshValidationStates();
+            }
+
+            return result;
         }
 
         /// <summary>
@@ -452,11 +357,8 @@ namespace Yueby.QuickActions
             if (totalActions == 0) return false;
 
             var currentPageIndex = _currentNode.CurrentPageIndex;
-            bool needBackButton = !IsAtRoot || currentPageIndex > 0;
-            
-            // Calculate start index for next page
-            var nextPageStartIndex = CalculateStartIndex(currentPageIndex + 1, needBackButton);
-            
+            var nextPageStartIndex = (currentPageIndex + 1) * MaxButtonsPerPage;
+
             // Check if there's a next page
             if (nextPageStartIndex < totalActions)
             {
@@ -479,6 +381,72 @@ namespace Yueby.QuickActions
                 return true;
             }
             return false;
+        }
+
+        /// <summary>
+        /// Check if can navigate back (to parent or previous page)
+        /// </summary>
+        public bool CanNavigateBack()
+        {
+            EnsureTreeBuilt();
+
+            // Can navigate back if not on first page
+            if (_currentNode.CurrentPageIndex > 0)
+            {
+                return true;
+            }
+
+            // Can navigate back if not at root node
+            if (_currentNode.Parent != null)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Check if can go to next page
+        /// </summary>
+        public bool CanNextPage()
+        {
+            EnsureTreeBuilt();
+            var totalActions = _currentNode.Children.Count;
+            if (totalActions == 0) return false;
+
+            var currentPageIndex = _currentNode.CurrentPageIndex;
+            var nextPageStartIndex = (currentPageIndex + 1) * MaxButtonsPerPage;
+
+            // Check if there's a next page
+            return nextPageStartIndex < totalActions;
+        }
+
+        /// <summary>
+        /// Check if current page has next page button
+        /// </summary>
+        public bool HasNextPage
+        {
+            get
+            {
+                EnsureTreeBuilt();
+                var totalActions = _currentNode.Children.Count;
+                if (totalActions == 0) return false;
+
+                var currentPageIndex = _currentNode.CurrentPageIndex;
+                var currentPageStartIndex = currentPageIndex * MaxButtonsPerPage;
+                var remainingActions = totalActions - currentPageStartIndex;
+
+                // Check if current page has more actions than can fit
+                return remainingActions > MaxButtonsPerPage;
+            }
+        }
+
+        /// <summary>
+        /// Get navigation info for current state
+        /// </summary>
+        public (bool canNavigateBack, bool hasNextPage) GetNavigationInfo()
+        {
+            return (CanNavigateBack(), HasNextPage);
         }
     }
 }

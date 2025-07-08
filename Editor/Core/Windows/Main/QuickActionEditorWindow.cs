@@ -1,5 +1,5 @@
-
 using System.Collections.Generic;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -7,11 +7,333 @@ using Yueby.QuickActions.UIElements;
 
 namespace Yueby.QuickActions
 {
+    /// <summary>
+    /// 选择区域类型
+    /// </summary>
+    public enum SelectionAreaType
+    {
+        /// <summary>
+        /// 无选择
+        /// </summary>
+        None,
+
+        /// <summary>
+        /// 圆环外部（按钮区域）
+        /// </summary>
+        OuterCircle,
+
+        /// <summary>
+        /// 圆环内部（扇形区域）
+        /// </summary>
+        InnerCircle
+    }
+
+    /// <summary>
+    /// 选择项抽象基类
+    /// </summary>
+    public abstract class SelectionItem
+    {
+        public bool IsAvailable { get; set; }
+        public abstract void UpdateVisual(bool isSelected);
+        public abstract void ClearVisual();
+        public abstract bool CanExecute();
+        public abstract void Execute();
+    }
+
+    /// <summary>
+    /// 按钮选择项
+    /// </summary>
+    public class ButtonSelectionItem : SelectionItem
+    {
+        private ActionButton _button;
+        private ActionNode _actionNode;
+        private QuickActionEditorWindow _window;
+
+        public ButtonSelectionItem(ActionButton button, ActionNode actionNode, QuickActionEditorWindow window)
+        {
+            _button = button;
+            _actionNode = actionNode;
+            _window = window;
+            IsAvailable = true; // 按钮总是可用的
+        }
+
+        public override void UpdateVisual(bool isSelected)
+        {
+            if (isSelected)
+            {
+                _button.Button.style.backgroundColor = new StyleColor(new Color(0.2f, 0.5f, 0.8f, 1f));
+                _button.BringToFront();
+            }
+            else
+            {
+                ClearVisual();
+            }
+        }
+
+        public override void ClearVisual()
+        {
+            _button.Button.style.backgroundColor = StyleKeyword.Null;
+        }
+
+        public override bool CanExecute()
+        {
+            return _actionNode != null;
+        }
+
+        public override void Execute()
+        {
+            if (_actionNode != null)
+            {
+                _window.HandleActionNodeClick(_actionNode, false);
+            }
+        }
+    }
+
+    /// <summary>
+    /// 扇形区域选择项
+    /// </summary>
+    public class SectorSelectionItem : SelectionItem
+    {
+        private VisualElement _sector;
+        private System.Func<bool> _canExecuteFunc;
+        private System.Action _executeAction;
+
+        public SectorSelectionItem(VisualElement sector, System.Func<bool> canExecuteFunc, System.Action executeAction)
+        {
+            _sector = sector;
+            _canExecuteFunc = canExecuteFunc;
+            _executeAction = executeAction;
+        }
+
+        public override void UpdateVisual(bool isSelected)
+        {
+            if (isSelected && IsAvailable)
+            {
+                _sector.style.unityBackgroundImageTintColor = new StyleColor(new Color(0.2f, 0.5f, 0.8f, 1f));
+                _sector.style.opacity = 1f;
+            }
+            else
+            {
+                _sector.style.unityBackgroundImageTintColor = new StyleColor(Color.white);
+                _sector.style.opacity = IsAvailable ? 0.3f : 0f;
+            }
+        }
+
+        public override void ClearVisual()
+        {
+            _sector.style.unityBackgroundImageTintColor = new StyleColor(Color.white);
+            _sector.style.opacity = IsAvailable ? 0.3f : 0f;
+        }
+
+        public override bool CanExecute()
+        {
+            return IsAvailable && _canExecuteFunc?.Invoke() == true;
+        }
+
+        public override void Execute()
+        {
+            if (CanExecute())
+            {
+                _executeAction?.Invoke();
+            }
+        }
+
+        public void UpdateAvailability()
+        {
+            IsAvailable = _canExecuteFunc?.Invoke() == true;
+        }
+    }
+
+    /// <summary>
+    /// 选择管理器
+    /// </summary>
+    public class SelectionManager
+    {
+        private List<SelectionItem> _outerCircleItems = new List<SelectionItem>();
+        private List<SectorSelectionItem> _innerCircleItems = new List<SectorSelectionItem>();
+        private SelectionAreaType _currentArea = SelectionAreaType.None;
+        private int _selectedIndex = -1;
+
+        public SelectionAreaType CurrentArea => _currentArea;
+        public int SelectedIndex => _selectedIndex;
+
+        public void SetOuterCircleItems(List<SelectionItem> items)
+        {
+            _outerCircleItems = items ?? new List<SelectionItem>();
+        }
+
+        public void SetInnerCircleItems(List<SectorSelectionItem> items)
+        {
+            _innerCircleItems = items ?? new List<SectorSelectionItem>();
+        }
+
+        public void UpdateArea(SelectionAreaType newArea)
+        {
+            if (newArea != _currentArea)
+            {
+                ClearSelection();
+                _currentArea = newArea;
+            }
+        }
+
+        public bool TrySelectByAngle(float angle)
+        {
+            int newIndex = -1;
+            bool canSelect = false;
+
+            switch (_currentArea)
+            {
+                case SelectionAreaType.OuterCircle:
+                    if (_outerCircleItems.Count > 0)
+                    {
+                        float anglePerButton = 360f / _outerCircleItems.Count;
+                        newIndex = Mathf.FloorToInt((angle + anglePerButton * 0.5f) / anglePerButton) % _outerCircleItems.Count;
+                        canSelect = _outerCircleItems[newIndex].CanExecute();
+                    }
+                    break;
+
+                case SelectionAreaType.InnerCircle:
+                    // 上方扇形区域：315度到45度 (返回)
+                    if ((angle >= 315 && angle <= 360) || (angle >= 0 && angle < 45))
+                    {
+                        newIndex = 0;
+                        canSelect = newIndex < _innerCircleItems.Count && _innerCircleItems[newIndex].CanExecute();
+                    }
+                    // 下方扇形区域：135度到225度 (下一页)
+                    else if (angle >= 135 && angle < 225)
+                    {
+                        newIndex = 1;
+                        canSelect = newIndex < _innerCircleItems.Count && _innerCircleItems[newIndex].CanExecute();
+                    }
+                    break;
+            }
+
+            if (canSelect && newIndex != _selectedIndex)
+            {
+                ClearSelection();
+                _selectedIndex = newIndex;
+                UpdateSelectionVisual();
+                return true;
+            }
+            else if (!canSelect && _selectedIndex == newIndex)
+            {
+                ClearSelection();
+            }
+
+            return false;
+        }
+
+        public void ClearSelection()
+        {
+            if (_selectedIndex >= 0)
+            {
+                var items = _currentArea == SelectionAreaType.OuterCircle ? _outerCircleItems : _innerCircleItems.Cast<SelectionItem>().ToList();
+                if (_selectedIndex < items.Count)
+                {
+                    items[_selectedIndex].ClearVisual();
+                }
+                _selectedIndex = -1;
+            }
+
+            // 更新扇形区域的可见性
+            UpdateSectorVisibility();
+        }
+
+        public bool ExecuteSelected()
+        {
+            if (_selectedIndex < 0) return false;
+
+            switch (_currentArea)
+            {
+                case SelectionAreaType.OuterCircle:
+                    if (_selectedIndex < _outerCircleItems.Count)
+                    {
+                        _outerCircleItems[_selectedIndex].Execute();
+                        return true;
+                    }
+                    break;
+
+                case SelectionAreaType.InnerCircle:
+                    if (_selectedIndex < _innerCircleItems.Count)
+                    {
+                        _innerCircleItems[_selectedIndex].Execute();
+                        return true;
+                    }
+                    break;
+            }
+
+            return false;
+        }
+
+        private void UpdateSelectionVisual()
+        {
+            if (_selectedIndex < 0) return;
+
+            switch (_currentArea)
+            {
+                case SelectionAreaType.OuterCircle:
+                    if (_selectedIndex < _outerCircleItems.Count)
+                    {
+                        _outerCircleItems[_selectedIndex].UpdateVisual(true);
+                    }
+                    break;
+
+                case SelectionAreaType.InnerCircle:
+                    if (_selectedIndex < _innerCircleItems.Count)
+                    {
+                        _innerCircleItems[_selectedIndex].UpdateVisual(true);
+                    }
+                    break;
+            }
+        }
+
+        private void UpdateSectorVisibility()
+        {
+            foreach (var item in _innerCircleItems)
+            {
+                item.UpdateAvailability();
+                item.UpdateVisual(false);
+            }
+        }
+
+        public void RefreshSectorAvailability()
+        {
+            UpdateSectorVisibility();
+        }
+
+        /// <summary>
+        /// 保存当前选中状态
+        /// </summary>
+        /// <returns>选中状态信息</returns>
+        public (SelectionAreaType area, int index) SaveCurrentSelection()
+        {
+            return (_currentArea, _selectedIndex);
+        }
+
+        /// <summary>
+        /// 恢复选中状态
+        /// </summary>
+        /// <param name="area">选择区域</param>
+        /// <param name="index">选择索引</param>
+        public void RestoreSelection(SelectionAreaType area, int index)
+        {
+            _currentArea = area;
+            _selectedIndex = index;
+
+            // 恢复视觉效果
+            if (_selectedIndex >= 0)
+            {
+                UpdateSelectionVisual();
+            }
+        }
+
+    }
+
     public class QuickActionEditorWindow : EditorWindow
     {
         private static Vector2 _mouseOffset = new Vector2(0, 0f);
         private static readonly int _captureExtension = 4;
-        private static readonly float _radius = 20f;
+        private static readonly float _selectRadius = 30f;
         private static readonly float _buttonRadius = 120f;
 
         private static Texture2D _texture = null;
@@ -21,9 +343,10 @@ namespace Yueby.QuickActions
 
         private VisualElement _root;
         private VisualElement _centerArc;
+        private VisualElement[] _optionSectors; // 存储扇形区域的引用
 
-        private bool _isAllowSelect = false;
-        private int _selectedButtonIndex = -1; // Current selected button index
+        // 选择管理器
+        private SelectionManager _selectionManager = new SelectionManager();
         private ActionButton[] _circularButtons; // Store references to all circular buttons
 
         // Action system related
@@ -47,10 +370,10 @@ namespace Yueby.QuickActions
         {
             // Auto execute selected action when window closes (only execute real Actions, not Collections)
             // Only execute when not closed by click and has valid selection
-            if (_isAllowSelect && !_isCloseByClick && _selectedButtonIndex >= 0 && _currentButtons != null && _selectedButtonIndex < _currentButtons.Count)
+            if (_selectionManager.CurrentArea == SelectionAreaType.OuterCircle && !_isCloseByClick && _selectionManager.SelectedIndex >= 0 && _currentButtons != null && _selectionManager.SelectedIndex < _currentButtons.Count)
             {
-                var actionNode = _currentButtons[_selectedButtonIndex];
-                // Only execute when selected is a real Action, not Collection, Back, NextPage
+                var actionNode = _currentButtons[_selectionManager.SelectedIndex];
+                // Only execute when selected is a real Action, not Collection
                 if (actionNode.Type == ActionNodeType.Action)
                 {
                     HandleActionNodeClick(actionNode, false);
@@ -83,29 +406,45 @@ namespace Yueby.QuickActions
             }
         }
 
+        private Vector2 _lastMousePosition = Vector2.zero;
+
         private void OnGUI()
         {
-            // Logger.Info(focusedWindow);
-            var angle = GetAngleFromMousePosition(Event.current.mousePosition);
-            var mouseFromCenter = GetMousePositionFromCenter(Event.current.mousePosition);
-            _isAllowSelect = mouseFromCenter.magnitude > _radius;
+            var currentMousePosition = Event.current.mousePosition;
+
+            // 只在鼠标位置变化时执行逻辑
+            if (currentMousePosition != _lastMousePosition)
+            {
+                _lastMousePosition = currentMousePosition;
+                HandleMousePositionChange(currentMousePosition);
+            }
+        }
+
+        /// <summary>
+        /// 处理鼠标位置变化
+        /// </summary>
+        /// <param name="mousePosition">当前鼠标位置</param>
+        private void HandleMousePositionChange(Vector2 mousePosition)
+        {
+            var angle = GetAngleFromMousePosition(mousePosition);
+            var mouseFromCenter = GetMousePositionFromCenter(mousePosition);
+            var distanceFromCenter = mouseFromCenter.magnitude;
+
+            var newSelectionArea = distanceFromCenter > _selectRadius ? SelectionAreaType.OuterCircle :
+                                  distanceFromCenter <= _selectRadius ? SelectionAreaType.InnerCircle :
+                                  SelectionAreaType.None;
+
+            // 更新选择区域
+            _selectionManager.UpdateArea(newSelectionArea);
 
             if (_centerArc != null)
             {
-                _centerArc.style.opacity = _isAllowSelect ? 1 : 0;
+                _centerArc.style.opacity = _selectionManager.CurrentArea == SelectionAreaType.OuterCircle ? 1 : 0;
                 _centerArc.style.rotate = new Rotate(angle);
             }
 
-            // Select button based on angle
-            if (_isAllowSelect)
-            {
-                SelectButtonByAngle(angle);
-            }
-            else
-            {
-                ClearButtonSelection();
-            }
-
+            // 根据角度进行选择
+            _selectionManager.TrySelectByAngle(angle);
         }
 
         /// <summary>
@@ -133,6 +472,17 @@ namespace Yueby.QuickActions
 
             _centerArc = _root.Q<VisualElement>("center-arc");
             _centerArc.style.opacity = 0;
+
+            // 初始化扇形区域引用
+            var optionSectorRoot = _root.Q<VisualElement>("option-sector-root");
+            var sectors = optionSectorRoot.Query<VisualElement>("option-sector").ToList();
+            _optionSectors = sectors.ToArray();
+
+            // 设置扇形区域的初始颜色
+            foreach (var sector in _optionSectors)
+            {
+                sector.style.unityBackgroundImageTintColor = new StyleColor(Color.white);
+            }
         }
 
         /// <summary>
@@ -222,31 +572,31 @@ namespace Yueby.QuickActions
         /// <summary>
         /// Handle mouse click event (called from QuickAction)
         /// </summary>
-        public void OnMouseClick(Event evt)
+        public void OnLeftMouseClick(Event evt)
         {
+            _selectionManager.ExecuteSelected();
 
-            if (_isAllowSelect && _selectedButtonIndex >= 0)
-            {
-                ExecuteSelectedButton();
-            }
+            // 执行action后清空选中状态，等待鼠标移动重新选择
+            // _selectionManager.ClearSelection();
         }
 
         /// <summary>
-        /// Execute currently selected button
+        /// Handle right mouse click event (called from QuickAction)
         /// </summary>
-        private void ExecuteSelectedButton()
+        public void OnRightMouseClick(Event evt)
         {
-            if (_currentButtons == null || _selectedButtonIndex < 0 || _selectedButtonIndex >= _currentButtons.Count)
-                return;
+            // 取消选择
+            _selectionManager.ClearSelection();
 
-            var actionNode = _currentButtons[_selectedButtonIndex];
-            HandleActionNodeClick(actionNode);
+            // 关闭窗口
+            _isCloseByClick = true;
+            Close();
         }
 
         /// <summary>
         /// Handle action node click
         /// </summary>
-        private void HandleActionNodeClick(ActionNode actionNode, bool shouldCloseWindow = true)
+        public void HandleActionNodeClick(ActionNode actionNode, bool shouldCloseWindow = true)
         {
             switch (actionNode.Type)
             {
@@ -262,23 +612,19 @@ namespace Yueby.QuickActions
                         _isCloseByClick = true;
                     }
 
-                    // Execute Action - separation of concerns: navigation and execution are separate
-                    _actionTree.ExecuteAction(actionNode);
+                    // Execute Action - ActionTree会处理validation刷新
+                    var executed = _actionTree.ExecuteAction(actionNode);
+
+                    // 如果不关闭窗口且执行成功，刷新UI以反映validation的变化
+                    if (!shouldCloseWindow && executed)
+                    {
+                        RefreshButtons();
+                    }
 
                     if (shouldCloseWindow)
                     {
                         Close();
                     }
-                    break;
-
-                case ActionNodeType.Back:
-                    _actionTree.NavigateBack();
-                    RefreshButtons();
-                    break;
-
-                case ActionNodeType.NextPage:
-                    _actionTree.NextPage();
-                    RefreshButtons();
                     break;
             }
         }
@@ -303,14 +649,72 @@ namespace Yueby.QuickActions
             }
 
             CreateDynamicButtons();
+            SetupSelectionManager(); // 设置选择管理器
+        }
 
-            ClearButtonSelection();
-            var angle = GetAngleFromMousePosition(Event.current.mousePosition);
+        /// <summary>
+        /// 设置选择管理器
+        /// </summary>
+        private void SetupSelectionManager()
+        {
+            // 保存当前选中状态
+            var (currentArea, currentIndex) = _selectionManager.SaveCurrentSelection();
 
-            // Select button based on angle
-            if (_isAllowSelect)
+            // 设置外圆按钮选择项
+            var outerCircleItems = new List<SelectionItem>();
+            if (_circularButtons != null && _currentButtons != null)
             {
-                SelectButtonByAngle(angle);
+                for (int i = 0; i < _circularButtons.Length && i < _currentButtons.Count; i++)
+                {
+                    var buttonItem = new ButtonSelectionItem(_circularButtons[i], _currentButtons[i], this);
+                    outerCircleItems.Add(buttonItem);
+                }
+            }
+            _selectionManager.SetOuterCircleItems(outerCircleItems);
+
+            // 设置内圆扇形区域选择项
+            var innerCircleItems = new List<SectorSelectionItem>();
+            if (_optionSectors != null && _actionTree != null)
+            {
+                // 上方扇形区域 - 返回上一级
+                if (_optionSectors.Length > 0)
+                {
+                    var backItem = new SectorSelectionItem(
+                        _optionSectors[0],
+                        () => _actionTree.CanNavigateBack(),
+                        () =>
+                        {
+                            _actionTree.NavigateBack();
+                            RefreshButtons();
+                        }
+                    );
+                    innerCircleItems.Add(backItem);
+                }
+
+                // 下方扇形区域 - 下一页
+                if (_optionSectors.Length > 1)
+                {
+                    var nextPageItem = new SectorSelectionItem(
+                        _optionSectors[1],
+                        () => _actionTree.CanNextPage(),
+                        () =>
+                        {
+                            _actionTree.NextPage();
+                            RefreshButtons();
+                        }
+                    );
+                    innerCircleItems.Add(nextPageItem);
+                }
+            }
+            _selectionManager.SetInnerCircleItems(innerCircleItems);
+
+            // 刷新扇形区域可见性
+            _selectionManager.RefreshSectorAvailability();
+
+            // 恢复之前的选中状态
+            if (currentArea != SelectionAreaType.None && currentIndex >= 0)
+            {
+                _selectionManager.RestoreSelection(currentArea, currentIndex);
             }
         }
 
@@ -369,44 +773,6 @@ namespace Yueby.QuickActions
             }
         }
 
-        /// <summary>
-        /// Select button based on angle
-        /// </summary>
-        /// <param name="angle">Current mouse angle</param>
-        private void SelectButtonByAngle(float angle)
-        {
-            if (_circularButtons == null || _circularButtons.Length == 0) return;
-
-            int buttonCount = _circularButtons.Length;
-            float anglePerButton = 360f / buttonCount;
-            int buttonIndex = Mathf.FloorToInt((angle + anglePerButton * 0.5f) / anglePerButton) % buttonCount;
-
-            if (buttonIndex != _selectedButtonIndex)
-            {
-                ClearButtonSelection();
-
-                _selectedButtonIndex = buttonIndex;
-                if (_selectedButtonIndex >= 0 && _selectedButtonIndex < _circularButtons.Length)
-                {
-                    var selectedButton = _circularButtons[_selectedButtonIndex];
-                    selectedButton.Button.style.backgroundColor = new StyleColor(new Color(0.2f, 0.5f, 0.8f, 1f));
-
-                    // Bring selected button to front for display
-                    selectedButton.BringToFront();
-                }
-            }
-        }
-
-        private void ClearButtonSelection()
-        {
-            if (_circularButtons != null && _selectedButtonIndex >= 0 && _selectedButtonIndex < _circularButtons.Length)
-            {
-                var previousButton = _circularButtons[_selectedButtonIndex];
-                previousButton.Button.style.backgroundColor = StyleKeyword.Null;
-            }
-            _selectedButtonIndex = -1;
-        }
-
         private Vector2 GetCenterPosition()
         {
             Rect windowRect = new Rect(0, 0, maxSize.x, maxSize.y);
@@ -430,6 +796,5 @@ namespace Yueby.QuickActions
 
             return angleDeg;
         }
-
     }
 }
