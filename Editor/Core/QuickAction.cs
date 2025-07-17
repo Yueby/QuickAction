@@ -24,7 +24,7 @@ namespace Yueby.QuickActions
         public static EditorWindow LastMouseOverWindow => _lastMouseOverWindow;
 
         /// <summary>
-        /// 动作状态信息
+        /// Action state information
         /// </summary>
         public class ActionState
         {
@@ -33,12 +33,12 @@ namespace Yueby.QuickActions
             public bool Enabled { get; set; } = true;
 
             /// <summary>
-            /// 是否显示checkmark（只有显式设置了Checked状态才显示）
+            /// Whether to show checkmark (only shown if Checked state is explicitly set)
             /// </summary>
             public bool ShowCheckmark => Checked.HasValue;
 
             /// <summary>
-            /// 是否选中（仅在ShowCheckmark为true时有效）
+            /// Whether checked (only valid when ShowCheckmark is true)
             /// </summary>
             public bool IsChecked => Checked ?? false;
         }
@@ -222,22 +222,22 @@ namespace Yueby.QuickActions
         }
 
         /// <summary>
-        /// 更新动作状态（通过调用validation方法）
+        /// Update action state (by calling validation method)
         /// </summary>
         private static void UpdateActionState(ActionInfo actionInfo)
         {
-            // 重置状态为默认值
+            // Reset state to default values
             var state = GetActionState(actionInfo.Path);
             state.Visible = true;
-            state.Checked = null; // 重置为未设置状态
+            state.Checked = null; // Reset to unset state
             state.Enabled = true;
 
             if (actionInfo.ValidateMethod != null)
             {
                 try
                 {
-                    // 调用validation方法，方法内部可以通过SetVisible、SetChecked来设置状态
-                    // validation方法的返回值用作Enabled状态
+                    // Call validation method, which can set state through SetVisible, SetChecked
+                    // The return value of the validation method is used as the Enabled state
                     var result = (bool)actionInfo.ValidateMethod.Invoke(null, null);
                     state.Enabled = result;
                 }
@@ -250,7 +250,7 @@ namespace Yueby.QuickActions
         }
 
         /// <summary>
-        /// 获取动作状态
+        /// Get action state
         /// </summary>
         public static ActionState GetActionState(string path)
         {
@@ -306,7 +306,7 @@ namespace Yueby.QuickActions
         }
 
         /// <summary>
-        /// 强制刷新所有action的validation状态
+        /// Force refresh validation states of all actions
         /// </summary>
         public static void RefreshValidationStates()
         {
@@ -319,13 +319,13 @@ namespace Yueby.QuickActions
             }
         }
 
-        #region 动作状态设置方法
+        #region Action State Setting Methods
 
         /// <summary>
-        /// 设置动作的可见性
+        /// Set action visibility
         /// </summary>
-        /// <param name="path">动作路径</param>
-        /// <param name="visible">是否可见</param>
+        /// <param name="path">Action path</param>
+        /// <param name="visible">Whether visible</param>
         public static void SetVisible(string path, bool visible)
         {
             var state = GetActionState(path);
@@ -333,10 +333,10 @@ namespace Yueby.QuickActions
         }
 
         /// <summary>
-        /// 设置动作的选中状态
+        /// Set action checked state
         /// </summary>
-        /// <param name="path">动作路径</param>
-        /// <param name="checked">是否选中</param>
+        /// <param name="path">Action path</param>
+        /// <param name="checked">Whether checked</param>
         public static void SetChecked(string path, bool @checked)
         {
             var state = GetActionState(path);
@@ -344,30 +344,30 @@ namespace Yueby.QuickActions
         }
 
         /// <summary>
-        /// 获取动作的可见性
+        /// Get action visibility
         /// </summary>
-        /// <param name="path">动作路径</param>
-        /// <returns>是否可见</returns>
+        /// <param name="path">Action path</param>
+        /// <returns>Whether visible</returns>
         public static bool GetVisible(string path)
         {
             return GetActionState(path).Visible;
         }
 
         /// <summary>
-        /// 获取动作的选中状态
+        /// Get action checked state
         /// </summary>
-        /// <param name="path">动作路径</param>
-        /// <returns>是否选中</returns>
+        /// <param name="path">Action path</param>
+        /// <returns>Whether checked</returns>
         public static bool GetChecked(string path)
         {
             return GetActionState(path).IsChecked;
         }
 
         /// <summary>
-        /// 获取动作是否显示checkmark
+        /// Get whether action shows checkmark
         /// </summary>
-        /// <param name="path">动作路径</param>
-        /// <returns>是否显示checkmark</returns>
+        /// <param name="path">Action path</param>
+        /// <returns>Whether to show checkmark</returns>
         public static bool GetShowCheckmark(string path)
         {
             return GetActionState(path).ShowCheckmark;
@@ -387,6 +387,7 @@ namespace Yueby.QuickActions
                         _isCtrlQPressed = true;
                         _lastMouseOverWindow = EditorWindow.mouseOverWindow;
                         OnKeyDown(evt);
+                        evt.Use();
                     }
                     break;
 
@@ -404,6 +405,7 @@ namespace Yueby.QuickActions
                         {
                             _isCtrlQPressed = false;
                             OnKeyUp(evt);
+                            evt.Use();
                         }
                     }
                     break;
@@ -424,6 +426,7 @@ namespace Yueby.QuickActions
                 {
                     _currentWindow.OnRightMouseClick(evt);
                 }
+                evt.Use();
             }
         }
 

@@ -4,11 +4,11 @@ using UnityEditor;
 namespace Yueby.QuickActions.Actions.Selections
 {
     /// <summary>
-    /// Transform组件相关的快捷操作
+    /// Transform component-related quick actions
     /// </summary>
     public static class TransformAction
     {
-        [QuickAction("Selection/Transform/Reset Position", "重置选中GameObject的位置", Priority = -860, ValidateFunction = nameof(ValidateGameObjectSelected))]
+        [QuickAction("Selection/Transform/Reset Position", "Reset position of selected GameObject", Priority = -860, ValidateFunction = nameof(ValidateGameObjectSelected))]
         public static void ResetPosition()
         {
             if (Selection.gameObjects.Length > 0)
@@ -21,8 +21,8 @@ namespace Yueby.QuickActions.Actions.Selections
                 Logger.Info($"Reset position for {Selection.gameObjects.Length} GameObject(s)");
             }
         }
-        
-        [QuickAction("Selection/Transform/Reset Rotation", "重置选中GameObject的旋转", Priority = -859, ValidateFunction = nameof(ValidateGameObjectSelected))]
+
+        [QuickAction("Selection/Transform/Reset Rotation", "Reset rotation of selected GameObject", Priority = -859, ValidateFunction = nameof(ValidateGameObjectSelected))]
         public static void ResetRotation()
         {
             if (Selection.gameObjects.Length > 0)
@@ -35,8 +35,8 @@ namespace Yueby.QuickActions.Actions.Selections
                 Logger.Info($"Reset rotation for {Selection.gameObjects.Length} GameObject(s)");
             }
         }
-        
-        [QuickAction("Selection/Transform/Reset Scale", "重置选中GameObject的缩放", Priority = -858, ValidateFunction = nameof(ValidateGameObjectSelected))]
+
+        [QuickAction("Selection/Transform/Reset Scale", "Reset scale of selected GameObject", Priority = -858, ValidateFunction = nameof(ValidateGameObjectSelected))]
         public static void ResetScale()
         {
             if (Selection.gameObjects.Length > 0)
@@ -49,8 +49,8 @@ namespace Yueby.QuickActions.Actions.Selections
                 Logger.Info($"Reset scale for {Selection.gameObjects.Length} GameObject(s)");
             }
         }
-        
-        [QuickAction("Selection/Transform/Reset All", "重置选中GameObject的所有Transform属性", Priority = -857, ValidateFunction = nameof(ValidateGameObjectSelected))]
+
+        [QuickAction("Selection/Transform/Reset All", "Reset all Transform properties of selected GameObject", Priority = -857, ValidateFunction = nameof(ValidateGameObjectSelected))]
         public static void ResetAll()
         {
             if (Selection.gameObjects.Length > 0)
@@ -65,8 +65,8 @@ namespace Yueby.QuickActions.Actions.Selections
                 Logger.Info($"Reset all transform properties for {Selection.gameObjects.Length} GameObject(s)");
             }
         }
-        
-        [QuickAction("Selection/Transform/Copy Transform", "复制选中GameObject的Transform值", Priority = -856, ValidateFunction = nameof(ValidateSingleGameObjectSelected))]
+
+        [QuickAction("Selection/Transform/Copy Transform", "Copy Transform values of selected GameObject", Priority = -856, ValidateFunction = nameof(ValidateSingleGameObjectSelected))]
         public static void CopyTransform()
         {
             if (Selection.activeGameObject != null)
@@ -85,8 +85,8 @@ namespace Yueby.QuickActions.Actions.Selections
                 Logger.Info($"Transform data copied to clipboard: {Selection.activeGameObject.name}");
             }
         }
-        
-        [QuickAction("Selection/Transform/Paste Transform", "粘贴Transform值到选中的GameObject", Priority = -855, ValidateFunction = nameof(ValidateGameObjectSelected))]
+
+        [QuickAction("Selection/Transform/Paste Transform", "Paste Transform values to selected GameObject", Priority = -855, ValidateFunction = nameof(ValidateGameObjectSelected))]
         public static void PasteTransform()
         {
             if (Selection.gameObjects.Length > 0)
@@ -118,8 +118,8 @@ namespace Yueby.QuickActions.Actions.Selections
                 }
             }
         }
-        
-        [QuickAction("Selection/Transform/Snap to Ground", "将选中GameObject贴合到地面", Priority = -854, ValidateFunction = nameof(ValidateGameObjectSelected))]
+
+        [QuickAction("Selection/Transform/Snap to Ground", "Snap selected GameObject to ground", Priority = -854, ValidateFunction = nameof(ValidateGameObjectSelected))]
         public static void SnapToGround()
         {
             if (Selection.gameObjects.Length > 0)
@@ -143,8 +143,8 @@ namespace Yueby.QuickActions.Actions.Selections
                 Logger.Info($"Snapped {Selection.gameObjects.Length} GameObject(s) to ground");
             }
         }
-        
-        [QuickAction("Selection/Transform/Randomize Rotation", "随机化选中GameObject的旋转", Priority = -853, ValidateFunction = nameof(ValidateGameObjectSelected))]
+
+        [QuickAction("Selection/Transform/Randomize Rotation", "Randomize rotation of selected GameObject", Priority = -853, ValidateFunction = nameof(ValidateGameObjectSelected))]
         public static void RandomizeRotation()
         {
             if (Selection.gameObjects.Length > 0)
@@ -157,8 +157,8 @@ namespace Yueby.QuickActions.Actions.Selections
                 Logger.Info($"Randomized rotation for {Selection.gameObjects.Length} GameObject(s)");
             }
         }
-        
-        [QuickAction("Selection/Transform/Align to View", "将选中GameObject对齐到Scene视图", Priority = -852, ValidateFunction = nameof(ValidateGameObjectSelected))]
+
+        [QuickAction("Selection/Transform/Align to View", "Align selected GameObject to Scene view", Priority = -852, ValidateFunction = nameof(ValidateGameObjectSelected))]
         public static void AlignToView()
         {
             if (Selection.gameObjects.Length > 0 && SceneView.lastActiveSceneView != null)
@@ -175,11 +175,11 @@ namespace Yueby.QuickActions.Actions.Selections
                 Logger.Info($"Aligned {Selection.gameObjects.Length} GameObject(s) to scene view");
             }
         }
-        
+
         #region Validation Methods
-        
+
         /// <summary>
-        /// 验证是否选中了GameObject
+        /// Validate if a GameObject is selected
         /// </summary>
         private static bool ValidateGameObjectSelected()
         {
@@ -196,9 +196,9 @@ namespace Yueby.QuickActions.Actions.Selections
 
             return hasGameObjectSelected;
         }
-        
+
         /// <summary>
-        /// 验证是否只选中了一个GameObject
+        /// Validate if only one GameObject is selected
         /// </summary>
         private static bool ValidateSingleGameObjectSelected()
         {
@@ -206,13 +206,13 @@ namespace Yueby.QuickActions.Actions.Selections
             QuickAction.SetVisible("Selection/Transform/Copy Transform", hasSingleGameObjectSelected);
             return hasSingleGameObjectSelected;
         }
-        
+
         #endregion
-        
+
         #region Helper Classes
-        
+
         /// <summary>
-        /// Transform数据结构，用于复制粘贴
+        /// Transform data structure for copy and paste
         /// </summary>
         [System.Serializable]
         private class TransformData

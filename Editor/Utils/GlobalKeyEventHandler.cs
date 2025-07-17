@@ -5,24 +5,24 @@ using UnityEditor;
 namespace Yueby.QuickActions
 {
     /// <summary>
-    /// 全局按键事件处理器
+    /// Global key event handler
     /// Thanks to https://discussions.unity.com/t/599061/6
     /// </summary>
     [InitializeOnLoad]
     public static class GlobalKeyEventHandler
     {
         /// <summary>
-        /// 按键事件回调
+        /// Key event callback
         /// </summary>
         public static event Action<Event> OnKeyEvent;
-        
+
         /// <summary>
-        /// 鼠标事件回调
+        /// Mouse event callback
         /// </summary>
         public static event Action<Event> OnMouseEvent;
-        
+
         /// <summary>
-        /// 注册是否成功
+        /// Whether registration succeeded
         /// </summary>
         public static bool RegistrationSucceeded = false;
 
@@ -46,7 +46,7 @@ namespace Yueby.QuickActions
                     info.SetValue(null, value);
 
                     RegistrationSucceeded = true;
-                    Logger.Debug("GlobalKeyEventHandler 注册成功");
+                    Logger.Debug("GlobalKeyEventHandler registered successfully");
                 }
                 else
                 {
@@ -67,7 +67,7 @@ namespace Yueby.QuickActions
         }
 
         /// <summary>
-        /// 按键按下时的回调方法
+        /// Callback method when key is pressed
         /// </summary>
         private static void onKeyPressed()
         {

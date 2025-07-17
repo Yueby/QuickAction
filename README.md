@@ -70,10 +70,19 @@ public class MyActions
 
 ### 3. Use the System
 
-1. Press `Ctrl+Q` in the Unity Editor
-2. Move your mouse away from the center to activate selection
-3. Hover over the desired action button
-4. Release `Ctrl+Q` or click to execute the action
+#### Basic Operations
+1. **Open Menu**: Press `Ctrl+Q` in the Unity Editor
+2. **Select Action**: Move mouse to different angles to automatically select options
+3. **Execute Action**: 
+   - Release `Ctrl+Q` to automatically execute the selected action
+   - Or left-click to execute the action
+4. **Cancel Operation**: Right-click to close the window without executing any action
+
+#### Operation Flow
+- Hold `Ctrl+Q` to open the menu
+- Move mouse to different angles to select different options
+- Release the key or left-click to execute
+- Right-click to cancel the operation
 
 ## Action Configuration
 
@@ -82,7 +91,7 @@ public class MyActions
 The `QuickActionAttribute` is used to mark methods as quick actions:
 
 ```csharp
-[QuickAction(path, description, Priority = priority, ValidateFunction = "ValidationMethod")]
+[QuickAction(path, description, Priority = priority, ValidateFunction = nameof(ValidationMethod))]
 ```
 
 **Parameters:**
@@ -311,24 +320,6 @@ Quick Action provides specialized SceneView integration features, including:
 - Provide meaningful error messages
 - Use try-catch blocks for risky operations
 
-## Troubleshooting
-
-### Actions Not Appearing
-1. Check namespace import: `using Yueby.QuickActions;`
-2. Ensure method is static and has correct signature
-3. Verify QuickAction attribute syntax
-4. Check for compilation errors
-
-### Validation Issues
-1. Ensure validation method exists and is static
-2. Check validation method returns bool
-3. Verify validation method name matches attribute parameter
-
-### Performance Issues
-1. Avoid complex operations in validation functions
-2. Consider caching expensive validation results
-3. Use conditional compilation for debug-only actions
-
 ## API Reference
 
 ### QuickActionAttribute
@@ -342,6 +333,7 @@ Quick Action provides specialized SceneView integration features, including:
 - `Priority`: Display priority (optional, default: 0)
 - `ValidateFunction`: Validation method name (optional)
 
-## License
+---
 
-This package is provided under the MIT License.
+**Development Note**: This project was developed with assistance from [Cursor](https://cursor.com/).
+

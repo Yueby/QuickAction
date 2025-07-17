@@ -4,12 +4,12 @@ using UnityEditor;
 namespace Yueby.QuickActions
 {
     /// <summary>
-    /// 统一的日志记录器
+    /// Unified logger
     /// </summary>
     public static class Logger
     {
         /// <summary>
-        /// 日志级别
+        /// Log level
         /// </summary>
         public enum LogLevel
         {
@@ -20,34 +20,34 @@ namespace Yueby.QuickActions
         }
 
         /// <summary>
-        /// 是否启用调试日志
+        /// Whether to enable debug logs
         /// </summary>
         public static bool EnableDebugLogs = true;
 
         /// <summary>
-        /// 是否启用信息日志
+        /// Whether to enable info logs
         /// </summary>
         public static bool EnableInfoLogs = true;
 
         /// <summary>
-        /// 是否启用警告日志
+        /// Whether to enable warning logs
         /// </summary>
         public static bool EnableWarningLogs = true;
 
         /// <summary>
-        /// 是否启用错误日志
+        /// Whether to enable error logs
         /// </summary>
         public static bool EnableErrorLogs = true;
 
         /// <summary>
-        /// 日志前缀
+        /// Log prefix
         /// </summary>
         private const string LOG_PREFIX = "[QuickAction]";
 
         /// <summary>
-        /// 记录调试日志
+        /// Log debug message
         /// </summary>
-        /// <param name="args">日志参数</param>
+        /// <param name="args">Log parameters</param>
         public static void Debug(params object[] args)
         {
             if (EnableDebugLogs)
@@ -57,9 +57,9 @@ namespace Yueby.QuickActions
         }
 
         /// <summary>
-        /// 记录信息日志
+        /// Log info message
         /// </summary>
-        /// <param name="args">日志参数</param>
+        /// <param name="args">Log parameters</param>
         public static void Info(params object[] args)
         {
             if (EnableInfoLogs)
@@ -69,9 +69,9 @@ namespace Yueby.QuickActions
         }
 
         /// <summary>
-        /// 记录警告日志
+        /// Log warning message
         /// </summary>
-        /// <param name="args">日志参数</param>
+        /// <param name="args">Log parameters</param>
         public static void Warning(params object[] args)
         {
             if (EnableWarningLogs)
@@ -81,9 +81,9 @@ namespace Yueby.QuickActions
         }
 
         /// <summary>
-        /// 记录错误日志
+        /// Log error message
         /// </summary>
-        /// <param name="args">日志参数</param>
+        /// <param name="args">Log parameters</param>
         public static void Error(params object[] args)
         {
             if (EnableErrorLogs)
@@ -93,11 +93,11 @@ namespace Yueby.QuickActions
         }
 
         /// <summary>
-        /// 记录格式化日志
+        /// Log formatted message
         /// </summary>
-        /// <param name="level">日志级别</param>
-        /// <param name="format">格式化字符串</param>
-        /// <param name="args">格式化参数</param>
+        /// <param name="level">Log level</param>
+        /// <param name="format">Format string</param>
+        /// <param name="args">Format parameters</param>
         public static void LogFormat(LogLevel level, string format, params object[] args)
         {
             string message = string.Format(format, args);
@@ -105,10 +105,10 @@ namespace Yueby.QuickActions
         }
 
         /// <summary>
-        /// 内部日志记录方法
+        /// Internal logging method
         /// </summary>
-        /// <param name="level">日志级别</param>
-        /// <param name="args">日志参数</param>
+        /// <param name="level">Log level</param>
+        /// <param name="args">Log parameters</param>
         private static void Log(LogLevel level, params object[] args)
         {
             if (args == null || args.Length == 0)
@@ -147,7 +147,7 @@ namespace Yueby.QuickActions
         }
 
         /// <summary>
-        /// 启用所有日志
+        /// Enable all logs
         /// </summary>
         public static void EnableAllLogs()
         {
@@ -158,7 +158,7 @@ namespace Yueby.QuickActions
         }
 
         /// <summary>
-        /// 禁用所有日志
+        /// Disable all logs
         /// </summary>
         public static void DisableAllLogs()
         {
@@ -169,7 +169,7 @@ namespace Yueby.QuickActions
         }
 
         /// <summary>
-        /// 只启用错误和警告日志
+        /// Only enable error and warning logs
         /// </summary>
         public static void EnableOnlyErrorsAndWarnings()
         {

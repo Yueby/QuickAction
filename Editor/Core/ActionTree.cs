@@ -261,7 +261,7 @@ namespace Yueby.QuickActions
 
             var result = QuickAction.ExecuteAction(node.ActionInfo.Path);
 
-            // 执行action后刷新所有validation状态
+            // Refresh all validation states after executing action
             if (result)
             {
                 QuickAction.RefreshValidationStates();

@@ -8,28 +8,28 @@ using Yueby.QuickActions.UIElements;
 namespace Yueby.QuickActions
 {
     /// <summary>
-    /// 选择区域类型
+    /// Selection area type
     /// </summary>
     public enum SelectionAreaType
     {
         /// <summary>
-        /// 无选择
+        /// No selection
         /// </summary>
         None,
 
         /// <summary>
-        /// 圆环外部（按钮区域）
+        /// Outer circle (button area)
         /// </summary>
         OuterCircle,
 
         /// <summary>
-        /// 圆环内部（扇形区域）
+        /// Inner circle (sector area)
         /// </summary>
         InnerCircle
     }
 
     /// <summary>
-    /// 选择项抽象基类
+    /// Selection item abstract base class
     /// </summary>
     public abstract class SelectionItem
     {
@@ -41,7 +41,7 @@ namespace Yueby.QuickActions
     }
 
     /// <summary>
-    /// 按钮选择项
+    /// Button selection item
     /// </summary>
     public class ButtonSelectionItem : SelectionItem
     {
@@ -90,7 +90,7 @@ namespace Yueby.QuickActions
     }
 
     /// <summary>
-    /// 扇形区域选择项
+    /// Sector area selection item
     /// </summary>
     public class SectorSelectionItem : SelectionItem
     {
@@ -145,7 +145,7 @@ namespace Yueby.QuickActions
     }
 
     /// <summary>
-    /// 选择管理器
+    /// Selection manager
     /// </summary>
     public class SelectionManager
     {
@@ -302,19 +302,19 @@ namespace Yueby.QuickActions
         }
 
         /// <summary>
-        /// 保存当前选中状态
+        /// Save current selection state
         /// </summary>
-        /// <returns>选中状态信息</returns>
+        /// <returns>Selection state information</returns>
         public (SelectionAreaType area, int index) SaveCurrentSelection()
         {
             return (_currentArea, _selectedIndex);
         }
 
         /// <summary>
-        /// 恢复选中状态
+        /// Restore selection state
         /// </summary>
-        /// <param name="area">选择区域</param>
-        /// <param name="index">选择索引</param>
+        /// <param name="area">Selection area</param>
+        /// <param name="index">Selection index</param>
         public void RestoreSelection(SelectionAreaType area, int index)
         {
             _currentArea = area;
@@ -421,9 +421,9 @@ namespace Yueby.QuickActions
         }
 
         /// <summary>
-        /// 处理鼠标位置变化
+        /// Handle mouse position change
         /// </summary>
-        /// <param name="mousePosition">当前鼠标位置</param>
+        /// <param name="mousePosition">Current mouse position</param>
         private void HandleMousePositionChange(Vector2 mousePosition)
         {
             var angle = GetAngleFromMousePosition(mousePosition);

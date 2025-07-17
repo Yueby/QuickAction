@@ -70,10 +70,19 @@ public class MyActions
 
 ### 3. 使用系统
 
-1. 在Unity编辑器中按`Ctrl+Q`
-2. 将鼠标移离中心以激活选择
-3. 悬停在所需的操作按钮上
-4. 释放`Ctrl+Q`或点击以执行操作
+#### 基本操作
+1. **打开菜单**: 在Unity编辑器中按`Ctrl+Q`
+2. **选择操作**: 鼠标移动到对应角度会自动选择选项
+3. **执行操作**: 
+   - 松开`Ctrl+Q`键自动执行选中的操作
+   - 或者鼠标左键点击执行操作
+4. **取消操作**: 鼠标右键点击关闭窗口不执行任何操作
+
+#### 操作流程
+- 按住`Ctrl+Q`打开菜单
+- 鼠标移动到不同角度选择不同选项
+- 松开按键或左键点击执行
+- 右键点击取消操作
 
 ## 操作配置
 
@@ -82,7 +91,7 @@ public class MyActions
 `QuickActionAttribute`用于标记方法为快速操作：
 
 ```csharp
-[QuickAction(path, description, Priority = priority, ValidateFunction = "ValidationMethod")]
+[QuickAction(path, description, Priority = priority, ValidateFunction = nameof(ValidationMethod))]
 ```
 
 **参数：**
@@ -311,24 +320,6 @@ Quick Action提供了专门的SceneView集成功能，包括：
 - 提供有意义的错误消息
 - 对风险操作使用try-catch块
 
-## 故障排除
-
-### 操作未出现
-1. 检查命名空间导入：`using Yueby.QuickActions;`
-2. 确保方法是静态的且具有正确签名
-3. 验证QuickAction特性语法
-4. 检查编译错误
-
-### 验证问题
-1. 确保验证方法存在且是静态的
-2. 检查验证方法返回bool
-3. 验证验证方法名与特性参数匹配
-
-### 性能问题
-1. 避免在验证函数中进行复杂操作
-2. 考虑缓存昂贵的验证结果
-3. 对仅调试操作使用条件编译
-
 ## API参考
 
 ### QuickActionAttribute
@@ -342,6 +333,7 @@ Quick Action提供了专门的SceneView集成功能，包括：
 - `Priority`: 显示优先级（可选，默认：0）
 - `ValidateFunction`: 验证方法名（可选）
 
-## 许可证
+---
 
-此包在MIT许可证下提供。 
+**开发说明**: 本项目使用 [Cursor](https://cursor.sh/) 辅助开发。
+

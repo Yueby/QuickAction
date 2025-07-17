@@ -6,11 +6,11 @@ using System.IO;
 namespace Yueby.QuickActions.Actions.Selections
 {
     /// <summary>
-    /// SkinnedMeshRenderer组件相关的快捷操作
+    /// SkinnedMeshRenderer component-related quick actions
     /// </summary>
     public static class SkinnedMeshRendererAction
     {
-        [QuickAction("Selection/SkinnedMeshRenderer/Set Bounds To One", "设置选中SkinnedMeshRenderer的边界为1x1x1", Priority = -840, ValidateFunction = nameof(ValidateSkinnedMeshRendererSelected))]
+        [QuickAction("Selection/SkinnedMeshRenderer/Set Bounds To 1", "Set selected SkinnedMeshRenderer bounds to 1x1x1", Priority = -840, ValidateFunction = nameof(ValidateSkinnedMeshRendererSelected))]
         public static void SetBoundsToOne()
         {
             foreach (var obj in Selection.gameObjects)
@@ -21,18 +21,18 @@ namespace Yueby.QuickActions.Actions.Selections
                     continue;
                 }
 
-                Undo.RecordObject(smr, "Set Bounds To One");
+                Undo.RecordObject(smr, "Set Bounds To 1");
                 smr.localBounds = new Bounds(Vector3.zero, Vector3.one * 2f);
             }
-            
+
             Logger.Info($"Set bounds to one for {Selection.gameObjects.Length} SkinnedMeshRenderer(s)");
         }
 
-        [QuickAction("Selection/SkinnedMeshRenderer/Reset BlendShapes", "重置选中SkinnedMeshRenderer的所有BlendShape为0", Priority = -839, ValidateFunction = nameof(ValidateSkinnedMeshRendererSelected))]
+        [QuickAction("Selection/SkinnedMeshRenderer/Reset BlendShapes", "Reset all BlendShapes of selected SkinnedMeshRenderer to 0", Priority = -839, ValidateFunction = nameof(ValidateSkinnedMeshRendererSelected))]
         public static void ResetBlendShapes()
         {
             int totalResetCount = 0;
-            
+
             foreach (var obj in Selection.gameObjects)
             {
                 if (!obj.TryGetComponent<SkinnedMeshRenderer>(out var smr))
@@ -55,11 +55,11 @@ namespace Yueby.QuickActions.Actions.Selections
                     totalResetCount++;
                 }
             }
-            
+
             Logger.Info($"Reset {totalResetCount} BlendShape(s) on {Selection.gameObjects.Length} SkinnedMeshRenderer(s)");
         }
 
-        [QuickAction("Selection/SkinnedMeshRenderer/Create Animation Clip", "从当前BlendShape状态创建动画片段", Priority = -838, ValidateFunction = nameof(ValidateSingleSkinnedMeshRendererSelected))]
+        [QuickAction("Selection/SkinnedMeshRenderer/Create Animation Clip", "Create animation clip from current BlendShape state", Priority = -838, ValidateFunction = nameof(ValidateSingleSkinnedMeshRendererSelected))]
         public static void CreateAnimationClip()
         {
             if (!Selection.activeGameObject.TryGetComponent<SkinnedMeshRenderer>(out var smr))
@@ -121,7 +121,7 @@ namespace Yueby.QuickActions.Actions.Selections
                 };
                 AnimationUtility.SetEditorCurve(clip, bind, curve);
             }
-            
+
             var relativePath = FileUtil.GetProjectRelativePath(filePath);
 
             // Create the animation clip as asset
@@ -134,7 +134,7 @@ namespace Yueby.QuickActions.Actions.Selections
             Logger.Info($"Created animation clip with {validBlendShapesMap.Count} BlendShape(s): {relativePath}");
         }
 
-        [QuickAction("Selection/SkinnedMeshRenderer/Copy BlendShapes", "复制选中SkinnedMeshRenderer的BlendShape权重", Priority = -837, ValidateFunction = nameof(ValidateSingleSkinnedMeshRendererSelected))]
+        [QuickAction("Selection/SkinnedMeshRenderer/Copy BlendShapes", "Copy BlendShape weights from selected SkinnedMeshRenderer", Priority = -837, ValidateFunction = nameof(ValidateSingleSkinnedMeshRendererSelected))]
         public static void CopyBlendShapes()
         {
             if (!Selection.activeGameObject.TryGetComponent<SkinnedMeshRenderer>(out var smr))
@@ -162,14 +162,14 @@ namespace Yueby.QuickActions.Actions.Selections
             Logger.Info($"Copied {blendShapeData.weights.Count} BlendShape weights to clipboard");
         }
 
-        [QuickAction("Selection/SkinnedMeshRenderer/Paste BlendShapes", "粘贴BlendShape权重到选中的SkinnedMeshRenderer", Priority = -836, ValidateFunction = nameof(ValidateSkinnedMeshRendererSelected))]
+        [QuickAction("Selection/SkinnedMeshRenderer/Paste BlendShapes", "Paste BlendShape weights to selected SkinnedMeshRenderer", Priority = -836, ValidateFunction = nameof(ValidateSkinnedMeshRendererSelected))]
         public static void PasteBlendShapes()
         {
             try
             {
                 string clipboardData = EditorGUIUtility.systemCopyBuffer;
                 var blendShapeData = JsonUtility.FromJson<BlendShapeData>(clipboardData);
-                
+
                 if (blendShapeData == null || blendShapeData.weights == null)
                 {
                     Logger.Warning("Invalid BlendShape data in clipboard");
@@ -192,7 +192,7 @@ namespace Yueby.QuickActions.Actions.Selections
                     }
 
                     Undo.RecordObject(smr, "Paste BlendShape Weights");
-                    
+
                     foreach (var weightData in blendShapeData.weights)
                     {
                         // Find blend shape by name
@@ -207,7 +207,7 @@ namespace Yueby.QuickActions.Actions.Selections
                     }
                     successCount++;
                 }
-                
+
                 Logger.Info($"Pasted BlendShape weights to {successCount} SkinnedMeshRenderer(s)");
             }
             catch (System.Exception ex)
@@ -217,9 +217,9 @@ namespace Yueby.QuickActions.Actions.Selections
         }
 
         #region Validation Methods
-        
+
         /// <summary>
-        /// 验证是否选中了带有SkinnedMeshRenderer组件的GameObject
+        /// Validate if a GameObject with SkinnedMeshRenderer component is selected
         /// </summary>
         private static bool ValidateSkinnedMeshRendererSelected()
         {
@@ -237,20 +237,20 @@ namespace Yueby.QuickActions.Actions.Selections
                 }
             }
 
-            QuickAction.SetVisible("Selection/SkinnedMeshRenderer/Set Bounds To One", hasSkinnedMeshRenderer);
+            QuickAction.SetVisible("Selection/SkinnedMeshRenderer/Set Bounds To 1", hasSkinnedMeshRenderer);
             QuickAction.SetVisible("Selection/SkinnedMeshRenderer/Reset BlendShapes", hasSkinnedMeshRenderer);
             QuickAction.SetVisible("Selection/SkinnedMeshRenderer/Paste BlendShapes", hasSkinnedMeshRenderer);
 
             return hasSkinnedMeshRenderer;
         }
-        
+
         /// <summary>
-        /// 验证是否只选中了一个带有SkinnedMeshRenderer组件的GameObject
+        /// Validate if only one GameObject with SkinnedMeshRenderer component is selected
         /// </summary>
         private static bool ValidateSingleSkinnedMeshRendererSelected()
         {
             bool hasSingleSkinnedMeshRenderer = Selection.gameObjects.Length == 1 &&
-                   Selection.activeGameObject != null && 
+                   Selection.activeGameObject != null &&
                    Selection.activeGameObject.TryGetComponent<SkinnedMeshRenderer>(out _);
 
             QuickAction.SetVisible("Selection/SkinnedMeshRenderer/Create Animation Clip", hasSingleSkinnedMeshRenderer);
@@ -258,47 +258,47 @@ namespace Yueby.QuickActions.Actions.Selections
 
             return hasSingleSkinnedMeshRenderer;
         }
-        
+
         #endregion
-        
+
         #region Helper Methods
-        
+
         /// <summary>
-        /// 获取Transform的相对路径（用于动画绑定）
+        /// Get relative path of Transform (for animation binding)
         /// </summary>
         private static string GetRelativePath(Transform transform)
         {
             var path = "";
             var current = transform;
-            
+
             while (current.parent != null)
             {
                 if (string.IsNullOrEmpty(path))
                     path = current.name;
                 else
                     path = current.name + "/" + path;
-                    
+
                 current = current.parent;
             }
-            
+
             return path;
         }
-        
+
         #endregion
-        
+
         #region Helper Classes
-        
+
         /// <summary>
-        /// BlendShape数据结构，用于复制粘贴
+        /// BlendShape data structure for copy and paste
         /// </summary>
         [System.Serializable]
         private class BlendShapeData
         {
             public List<BlendShapeWeight> weights = new List<BlendShapeWeight>();
         }
-        
+
         /// <summary>
-        /// BlendShape权重数据
+        /// BlendShape weight data
         /// </summary>
         [System.Serializable]
         private class BlendShapeWeight
@@ -306,7 +306,7 @@ namespace Yueby.QuickActions.Actions.Selections
             public string name;
             public float weight;
         }
-        
+
         #endregion
     }
-} 
+}

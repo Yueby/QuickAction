@@ -100,11 +100,11 @@ namespace Yueby.QuickActions.Actions
         #region Helper Methods
 
         /// <summary>
-        /// 设置SceneView的观察方向（模拟Unity内置Orientation overlay行为）
+        /// Set SceneView observation direction (simulating Unity built-in Orientation overlay behavior)
         /// </summary>
-        /// <param name="direction">观察方向</param>
-        /// <param name="up">上方向</param>
-        /// <param name="viewName">视图名称</param>
+        /// <param name="direction">Observation direction</param>
+        /// <param name="up">Up direction</param>
+        /// <param name="viewName">View name</param>
         private static void SetSceneViewDirection(Vector3 direction, Vector3 up, string viewName)
         {
             if (QuickAction.IsMouseOverWindow<SceneView>())

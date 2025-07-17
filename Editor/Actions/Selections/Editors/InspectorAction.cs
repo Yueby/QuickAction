@@ -6,7 +6,7 @@ using System.Reflection;
 namespace Yueby.QuickActions.Actions
 {
     /// <summary>
-    /// Inspector相关的快捷操作
+    /// Inspector-related quick actions
     /// </summary>
     public static class InspectorAction
     {
@@ -77,7 +77,7 @@ namespace Yueby.QuickActions.Actions
         #region Validation Methods
 
         /// <summary>
-        /// 验证Inspector锁定状态
+        /// Validate Inspector lock state
         /// </summary>
         private static bool ValidateInspectorLock()
         {
@@ -96,7 +96,7 @@ namespace Yueby.QuickActions.Actions
         }
 
         /// <summary>
-        /// 验证Inspector Debug模式状态
+        /// Validate Inspector Debug mode state
         /// </summary>
         private static bool ValidateInspectorDebugMode()
         {

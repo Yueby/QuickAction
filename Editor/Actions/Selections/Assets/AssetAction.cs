@@ -20,14 +20,14 @@ namespace Yueby.QuickActions.Actions.Selections
                     string newPath = AssetDatabase.GenerateUniqueAssetPath(assetPath);
                     AssetDatabase.CopyAsset(assetPath, newPath);
                     AssetDatabase.Refresh();
-                    
+
                     var newAsset = AssetDatabase.LoadAssetAtPath<Object>(newPath);
                     Selection.activeObject = newAsset;
                     EditorGUIUtility.PingObject(newAsset);
                 }
             }
         }
-        
+
         [QuickAction("Selection/Delete Asset", "Delete selected Asset file", Priority = -899, ValidateFunction = nameof(ValidateAssetSelected))]
         public static void DeleteAsset()
         {
@@ -44,7 +44,7 @@ namespace Yueby.QuickActions.Actions.Selections
                 }
             }
         }
-        
+
         [QuickAction("Selection/Show in Explorer", "Show selected Asset in file explorer", Priority = -898, ValidateFunction = nameof(ValidateAssetSelected))]
         public static void ShowInExplorer()
         {
@@ -58,7 +58,7 @@ namespace Yueby.QuickActions.Actions.Selections
                 }
             }
         }
-        
+
         [QuickAction("Selection/Copy Path", "Copy selected Asset path to clipboard", Priority = -897, ValidateFunction = nameof(ValidateAssetSelected))]
         public static void CopyAssetPath()
         {
@@ -72,7 +72,7 @@ namespace Yueby.QuickActions.Actions.Selections
                 }
             }
         }
-        
+
         [QuickAction("Selection/Copy GUID", "Copy selected Asset GUID to clipboard", Priority = -896, ValidateFunction = nameof(ValidateAssetSelected))]
         public static void CopyAssetGUID()
         {
@@ -90,9 +90,9 @@ namespace Yueby.QuickActions.Actions.Selections
                 }
             }
         }
-        
+
         #region Validation Methods
-        
+
         /// <summary>
         /// Validate if an Asset is selected
         /// </summary>
@@ -100,7 +100,6 @@ namespace Yueby.QuickActions.Actions.Selections
         {
             bool hasAssetSelected = Selection.activeObject != null && AssetDatabase.Contains(Selection.activeObject);
 
-            // 设置所有Asset相关动作的可见性
             QuickAction.SetVisible("Selection/Duplicate Asset", hasAssetSelected);
             QuickAction.SetVisible("Selection/Delete Asset", hasAssetSelected);
             QuickAction.SetVisible("Selection/Show in Explorer", hasAssetSelected);
@@ -109,7 +108,7 @@ namespace Yueby.QuickActions.Actions.Selections
 
             return hasAssetSelected;
         }
-        
+
         #endregion
     }
 }

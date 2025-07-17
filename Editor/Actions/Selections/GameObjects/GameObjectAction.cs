@@ -4,11 +4,11 @@ using UnityEditor;
 namespace Yueby.QuickActions.Actions.Selections
 {
     /// <summary>
-    /// GameObject相关的快捷操作
+    /// GameObject-related quick actions
     /// </summary>
     public static class GameObjectAction
     {
-        [QuickAction("Selection/Duplicate", "复制选中的GameObject", Priority = -880, ValidateFunction = nameof(ValidateGameObjectSelected))]
+        [QuickAction("Selection/Duplicate", "Duplicate selected GameObject", Priority = -880, ValidateFunction = nameof(ValidateGameObjectSelected))]
         public static void DuplicateGameObject()
         {
             if (Selection.gameObjects.Length > 0)
@@ -22,8 +22,8 @@ namespace Yueby.QuickActions.Actions.Selections
                 Selection.objects = duplicated;
             }
         }
-        
-        [QuickAction("Selection/Delete", "删除选中的GameObject", Priority = -879, ValidateFunction = nameof(ValidateGameObjectSelected))]
+
+        [QuickAction("Selection/Delete", "Delete selected GameObject", Priority = -879, ValidateFunction = nameof(ValidateGameObjectSelected))]
         public static void DeleteGameObject()
         {
             if (Selection.gameObjects.Length > 0)
@@ -34,17 +34,8 @@ namespace Yueby.QuickActions.Actions.Selections
                 }
             }
         }
-        
-        [QuickAction("Selection/Focus", "在Scene视图中聚焦到选中的GameObject", Priority = -878, ValidateFunction = nameof(ValidateGameObjectSelected))]
-        public static void FocusGameObject()
-        {
-            if (Selection.activeGameObject != null)
-            {
-                SceneView.FrameLastActiveSceneView();
-            }
-        }
-        
-        [QuickAction("Selection/Select Parent", "选中当前GameObject的父对象", Priority = -877, ValidateFunction = nameof(ValidateGameObjectHasParent))]
+
+        [QuickAction("Selection/Select Parent", "Select parent of current GameObject", Priority = -877, ValidateFunction = nameof(ValidateGameObjectHasParent))]
         public static void SelectParent()
         {
             if (Selection.activeGameObject != null && Selection.activeGameObject.transform.parent != null)
@@ -52,8 +43,8 @@ namespace Yueby.QuickActions.Actions.Selections
                 Selection.activeGameObject = Selection.activeGameObject.transform.parent.gameObject;
             }
         }
-        
-        [QuickAction("Selection/Select Children", "选中当前GameObject的所有子对象", Priority = -876, ValidateFunction = nameof(ValidateGameObjectHasChildren))]
+
+        [QuickAction("Selection/Select Children", "Select all children of current GameObject", Priority = -876, ValidateFunction = nameof(ValidateGameObjectHasChildren))]
         public static void SelectChildren()
         {
             if (Selection.activeGameObject != null)
@@ -66,11 +57,11 @@ namespace Yueby.QuickActions.Actions.Selections
                 Selection.objects = children;
             }
         }
-        
+
         #region Validation Methods
-        
+
         /// <summary>
-        /// 验证是否选中了GameObject
+        /// Validate if a GameObject is selected
         /// </summary>
         private static bool ValidateGameObjectSelected()
         {
@@ -82,9 +73,9 @@ namespace Yueby.QuickActions.Actions.Selections
 
             return hasGameObjectSelected;
         }
-        
+
         /// <summary>
-        /// 验证GameObject是否有父对象
+        /// Validate if GameObject has a parent
         /// </summary>
         private static bool ValidateGameObjectHasParent()
         {
@@ -92,9 +83,9 @@ namespace Yueby.QuickActions.Actions.Selections
             QuickAction.SetVisible("Selection/Select Parent", hasParent);
             return hasParent;
         }
-        
+
         /// <summary>
-        /// 验证GameObject是否有子对象
+        /// Validate if GameObject has children
         /// </summary>
         private static bool ValidateGameObjectHasChildren()
         {
@@ -102,7 +93,7 @@ namespace Yueby.QuickActions.Actions.Selections
             QuickAction.SetVisible("Selection/Select Children", hasChildren);
             return hasChildren;
         }
-        
+
         #endregion
     }
 }

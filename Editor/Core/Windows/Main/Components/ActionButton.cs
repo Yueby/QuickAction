@@ -24,7 +24,7 @@ namespace Yueby.QuickActions.UIElements
             _checkMark = this.Q<VisualElement>("check-mark");
             _label = this.Q<Label>();
 
-            // 默认隐藏checkmark
+            // Hide checkmark by default
             SetChecked(false);
             SetShowCheckmark(false);
         }
@@ -35,13 +35,13 @@ namespace Yueby.QuickActions.UIElements
             {
                 if (isChecked)
                 {
-                    // 选中状态：蓝色，完全不透明
+                    // Checked state: blue, fully opaque
                     _checkMark.style.backgroundColor = new StyleColor(new Color(64f / 255f, 160f / 255f, 254f / 255f, 1f));
                     _checkMark.style.opacity = 1f;
                 }
                 else
                 {
-                    // 未选中状态：灰色，半透明
+                    // Unchecked state: gray, semi-transparent
                     _checkMark.style.backgroundColor = new StyleColor(new Color(149f / 255f, 149f / 255f, 149f / 255f, 1f));
                     _checkMark.style.opacity = 0.6f;
                 }
