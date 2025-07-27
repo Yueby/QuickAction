@@ -16,6 +16,7 @@ A powerful Unity Editor extension that provides a circular button interface for 
 - **State Management**: Visual state indicators (checked/unchecked, visible/hidden)
 - **Priority System**: Control action display order with priority values
 - **Easy Integration**: Simple attribute-based action registration
+- **Dynamic Actions**: Register actions programmatically at runtime for context-aware functionality
 
 ## Quick Start
 
@@ -122,6 +123,55 @@ Validation functions can also control action visibility and checked state using:
 - `QuickAction.GetVisible(path)`: Get visibility state
 - `QuickAction.GetChecked(path)`: Get checked state
 
+### Dynamic Actions
+
+Dynamic actions allow you to register actions programmatically at runtime, perfect for context-aware functionality:
+
+```csharp
+// Register a dynamic action
+QuickAction.RegisterDynamicAction(
+    "Selection/Component/Copy", 
+    () => CopyComponent(), 
+    "Copy selected component", 
+    -100
+);
+```
+
+**Dynamic Action Features:**
+- **Runtime Registration**: Add actions when the panel opens
+- **Automatic Cleanup**: Actions are automatically removed when the panel closes
+- **Context Awareness**: Perfect for operations that depend on current selection
+
+**Usage:**
+```csharp
+// Register event (during class initialization)
+[InitializeOnLoadMethod]
+private static void RegisterDynamicActions()
+{
+    QuickAction.OnBeforeOpen += OnQuickActionOpen;
+}
+
+// Register dynamic actions in the event
+private static void OnQuickActionOpen()
+{
+    QuickAction.RegisterDynamicAction(
+        "path/action_name", 
+        () => { /* action logic */ }, 
+        "action description", 
+        priority
+    );
+}
+
+// Dynamic action with validation
+QuickAction.RegisterDynamicAction(
+    "path/action_name", 
+    () => { /* action logic */ }, 
+    "action description", 
+    priority,
+    () => { /* validation logic, return bool */ }
+);
+```
+
 ## Examples
 
 ### Basic Actions
@@ -133,21 +183,18 @@ using Yueby.QuickActions;
 
 public class BasicActions
 {
-    [QuickAction("Debug/Clear Console", "Clear the console window")]
-    public static void ClearConsole()
+    [QuickAction("Debug/Hello World", "Display a greeting message")]
+    public static void HelloWorld()
     {
-        var assembly = System.Reflection.Assembly.GetAssembly(typeof(SceneView));
-        var type = assembly.GetType("UnityEditor.LogEntries");
-        var method = type.GetMethod("Clear");
-        method.Invoke(new object(), null);
+        Debug.Log("Hello from Quick Action!");
     }
     
-    [QuickAction("GameObject/Create Empty at Origin", "Create empty GameObject at world origin")]
-    public static void CreateEmptyAtOrigin()
+    [QuickAction("GameObject/Create Cube", "Create a cube in the scene")]
+    public static void CreateCube()
     {
-        var go = new GameObject("Empty GameObject");
-        go.transform.position = Vector3.zero;
-        Selection.activeGameObject = go;
+        var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        cube.name = "Quick Action Cube";
+        Selection.activeGameObject = cube;
     }
 }
 ```
@@ -267,6 +314,74 @@ public class HierarchicalActions
     }
 }
 ```
+
+### Dynamic Component Actions
+
+Dynamic actions are perfect for context-aware operations like component management:
+
+```csharp
+using UnityEngine;
+using UnityEditor;
+using Yueby.QuickActions;
+
+public class ComponentActions
+{
+    [InitializeOnLoadMethod]
+    private static void RegisterDynamicActions()
+    {
+        QuickAction.OnBeforeOpen += OnQuickActionOpen;
+    }
+
+    private static void OnQuickActionOpen()
+    {
+        if (Selection.activeGameObject != null)
+        {
+            var components = Selection.activeGameObject.GetComponents<Component>();
+            
+            foreach (var component in components)
+            {
+                if (component == null) continue;
+                
+                var componentName = component.GetType().Name;
+                var componentKey = $"{componentName}_{component.GetInstanceID()}";
+                
+                // Register copy and remove actions for each component
+                QuickAction.RegisterDynamicAction(
+                    $"Selection/Component/{componentName}/Copy",
+                    () => CopyComponent(componentKey),
+                    $"Copy {componentName} component",
+                    -850
+                );
+                
+                QuickAction.RegisterDynamicAction(
+                    $"Selection/Component/{componentName}/Remove",
+                    () => RemoveComponent(componentKey),
+                    $"Remove {componentName} component",
+                    -849
+                );
+            }
+        }
+    }
+
+    private static void CopyComponent(string componentKey)
+    {
+        // Implementation for copying component
+        Debug.Log($"Copied component: {componentKey}");
+    }
+
+    private static void RemoveComponent(string componentKey)
+    {
+        // Implementation for removing component
+        Debug.Log($"Removed component: {componentKey}");
+    }
+}
+```
+
+**Key Benefits:**
+- **Automatic Context Detection**: Actions are created based on current selection
+- **Temporary Actions**: Actions are automatically cleaned up when panel closes
+- **Scalable**: Works with any number of components or objects
+- **Performance Optimized**: Only creates actions when needed
 
 ## SceneView Integration
 

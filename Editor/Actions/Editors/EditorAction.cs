@@ -33,23 +33,5 @@ namespace Yueby.QuickActions.Actions
                 Logger.Info("PlayerPrefs cleared");
             }
         }
-
-        // [QuickAction("Editor/Debug Actions", "Debug: Show All Registered Actions", Priority = 1000)]
-        // public static void DebugActions()
-        // {
-        //     QuickAction.ForceInitialize();
-        //     var allActions = QuickAction.GetAllActions();
-        //     var enabledActions = QuickAction.GetEnabledActions();
-
-        //     Logger.Info($"Total registered actions: {allActions.Count}");
-        //     Logger.Info($"Enabled actions: {enabledActions.Count}");
-
-        //     foreach (var action in allActions.Values.OrderBy(a => a.Priority))
-        //     {
-        //         var isEnabled = enabledActions.ContainsKey(action.Path);
-        //         Logger.Info($"[{action.Priority}] {action.Path} - {action.Description} (Enabled: {isEnabled})");
-        //     }
-        // }
-
     }
 }

@@ -746,7 +746,7 @@ namespace Yueby.QuickActions
                 actionButton.SetText(actionNode.Name);
 
                 // 设置checkmark状态（只有Action类型且ShowCheckmark为true才显示）
-                if (actionNode.Type == ActionNodeType.Action && actionNode.ShowCheckmark)
+                if (actionNode.Type == ActionNodeType.Action && actionNode.ShowCheckMark)
                 {
                     actionButton.SetShowCheckmark(true);
                     actionButton.SetChecked(actionNode.IsChecked);

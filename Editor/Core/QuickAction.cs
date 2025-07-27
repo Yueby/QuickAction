@@ -14,12 +14,13 @@ namespace Yueby.QuickActions
         private static QuickActionEditorWindow _currentWindow;
         private static EditorWindow _lastMouseOverWindow;
 
-        // ActionRegistry功能整合
         private static Dictionary<string, ActionInfo> _registeredActions = new Dictionary<string, ActionInfo>();
         private static bool _initialized = false;
 
-        // 动作状态管理
-        private static Dictionary<string, ActionState> _actionStates = new Dictionary<string, ActionState>();
+        /// <summary>
+        /// Event triggered before QuickAction panel opens
+        /// </summary>
+        public static event Action OnBeforeOpen;
 
         public static EditorWindow LastMouseOverWindow => _lastMouseOverWindow;
 
@@ -29,18 +30,37 @@ namespace Yueby.QuickActions
         public class ActionState
         {
             public bool Visible { get; set; } = true;
-            public bool? Checked { get; set; } = null; // null表示未设置，true/false表示选中/未选中
             public bool Enabled { get; set; } = true;
+            public bool? Checked { get; set; } = null; // null means not set, true/false means checked/unchecked
 
             /// <summary>
             /// Whether to show checkmark (only shown if Checked state is explicitly set)
             /// </summary>
-            public bool ShowCheckmark => Checked.HasValue;
+            public bool ShowCheckMark => Checked.HasValue;
 
             /// <summary>
-            /// Whether checked (only valid when ShowCheckmark is true)
+            /// Whether checked (only valid when ShowCheckMark is true)
             /// </summary>
             public bool IsChecked => Checked ?? false;
+
+            /// <summary>
+            /// Reset state to default values
+            /// </summary>
+            public void Reset()
+            {
+                Visible = true;
+                Enabled = true;
+                Checked = null;
+            }
+        }
+
+        /// <summary>
+        /// Action type
+        /// </summary>
+        public enum ActionType
+        {
+            Static,     // Static methods (registered via Attribute)
+            Dynamic     // Dynamic methods (registered via code)
         }
 
         /// <summary>
@@ -51,10 +71,93 @@ namespace Yueby.QuickActions
             public string Path { get; set; }
             public string Name { get; set; }
             public string Description { get; set; }
-            public MethodInfo ActionMethod { get; set; }
-            public MethodInfo ValidateMethod { get; set; }
+            public ActionType Type { get; set; }
+            public MethodInfo ActionMethod { get; set; }  // Only for static actions
+            public Action DynamicAction { get; set; }     // Only for dynamic actions
+            public MethodInfo ValidateMethod { get; set; } // Only for static actions
+            public Func<bool> DynamicValidation { get; set; } // Only for dynamic actions
             public QuickActionAttribute Attribute { get; set; }
             public int Priority { get; set; }
+            public ActionState State { get; set; } = new ActionState();
+
+            /// <summary>
+            /// Execute the action
+            /// </summary>
+            public bool Execute()
+            {
+                if (!State.Enabled)
+                    return false;
+
+                try
+                {
+                    switch (Type)
+                    {
+                        case ActionType.Static:
+                            if (ActionMethod != null)
+                            {
+                                ActionMethod.Invoke(null, null);
+                                return true;
+                            }
+                            break;
+                        case ActionType.Dynamic:
+                            if (DynamicAction != null)
+                            {
+                                DynamicAction.Invoke();
+                                return true;
+                            }
+                            break;
+                    }
+                    return false;
+                }
+                catch (Exception ex)
+                {
+                    Logger.Error($"Failed to execute action {Path}: {ex.Message}");
+                    return false;
+                }
+            }
+
+            /// <summary>
+            /// Update action state by calling validation method
+            /// </summary>
+            public void UpdateState()
+            {
+                State.Reset();
+
+                switch (Type)
+                {
+                    case ActionType.Static:
+                        if (ValidateMethod != null)
+                        {
+                            try
+                            {
+                                var result = (bool)ValidateMethod.Invoke(null, null);
+                                State.Enabled = result;
+                            }
+                            catch (Exception ex)
+                            {
+                                Logger.Error($"Failed to execute validation method {ValidateMethod.Name}: {ex.Message}");
+                                State.Enabled = false;
+                            }
+                        }
+                        break;
+
+                    case ActionType.Dynamic:
+                        if (DynamicValidation != null)
+                        {
+                            try
+                            {
+                                var result = DynamicValidation.Invoke();
+                                State.Enabled = result;
+                            }
+                            catch (Exception ex)
+                            {
+                                Logger.Error($"Failed to execute dynamic validation: {ex.Message}");
+                                State.Enabled = false;
+                            }
+                        }
+                        break;
+                }
+            }
         }
 
         [InitializeOnLoadMethod]
@@ -143,6 +246,7 @@ namespace Yueby.QuickActions
                             Path = attribute.Path,
                             Name = GetActionName(attribute.Path),
                             Description = attribute.Description,
+                            Type = ActionType.Static,
                             ActionMethod = method,
                             ValidateMethod = validateMethod,
                             Attribute = attribute,
@@ -207,12 +311,10 @@ namespace Yueby.QuickActions
             foreach (var kvp in _registeredActions)
             {
                 var actionInfo = kvp.Value;
-                // 更新动作状态
+
                 UpdateActionState(actionInfo);
 
-                var state = GetActionState(actionInfo.Path);
-                // 只返回可见且启用的动作
-                if (state.Visible && state.Enabled)
+                if (actionInfo.State.Visible && actionInfo.State.Enabled)
                 {
                     enabledActions[kvp.Key] = actionInfo;
                 }
@@ -226,39 +328,7 @@ namespace Yueby.QuickActions
         /// </summary>
         private static void UpdateActionState(ActionInfo actionInfo)
         {
-            // Reset state to default values
-            var state = GetActionState(actionInfo.Path);
-            state.Visible = true;
-            state.Checked = null; // Reset to unset state
-            state.Enabled = true;
-
-            if (actionInfo.ValidateMethod != null)
-            {
-                try
-                {
-                    // Call validation method, which can set state through SetVisible, SetChecked
-                    // The return value of the validation method is used as the Enabled state
-                    var result = (bool)actionInfo.ValidateMethod.Invoke(null, null);
-                    state.Enabled = result;
-                }
-                catch (Exception ex)
-                {
-                    Logger.Error($"Failed to execute validation method {actionInfo.ValidateMethod.Name}: {ex.Message}");
-                    state.Enabled = false;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Get action state
-        /// </summary>
-        public static ActionState GetActionState(string path)
-        {
-            if (!_actionStates.ContainsKey(path))
-            {
-                _actionStates[path] = new ActionState();
-            }
-            return _actionStates[path];
+            actionInfo.UpdateState();
         }
 
         /// <summary>
@@ -276,24 +346,13 @@ namespace Yueby.QuickActions
         public static bool ExecuteAction(string path)
         {
             var action = GetAction(path);
-            if (action?.ActionMethod == null) return false;
+            if (action == null) return false;
 
-            // 更新并检查动作状态
             UpdateActionState(action);
-            var state = GetActionState(action.Path);
-            if (!state.Enabled)
+            if (!action.State.Visible || !action.State.Enabled)
                 return false;
 
-            try
-            {
-                action.ActionMethod.Invoke(null, null);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Logger.Error($"Failed to execute quick action {path}: {ex.Message}");
-                return false;
-            }
+            return action.Execute();
         }
 
         /// <summary>
@@ -328,8 +387,11 @@ namespace Yueby.QuickActions
         /// <param name="visible">Whether visible</param>
         public static void SetVisible(string path, bool visible)
         {
-            var state = GetActionState(path);
-            state.Visible = visible;
+            var action = GetAction(path);
+            if (action != null)
+            {
+                action.State.Visible = visible;
+            }
         }
 
         /// <summary>
@@ -339,8 +401,11 @@ namespace Yueby.QuickActions
         /// <param name="checked">Whether checked</param>
         public static void SetChecked(string path, bool @checked)
         {
-            var state = GetActionState(path);
-            state.Checked = @checked;
+            var action = GetAction(path);
+            if (action != null)
+            {
+                action.State.Checked = @checked;
+            }
         }
 
         /// <summary>
@@ -350,7 +415,8 @@ namespace Yueby.QuickActions
         /// <returns>Whether visible</returns>
         public static bool GetVisible(string path)
         {
-            return GetActionState(path).Visible;
+            var action = GetAction(path);
+            return action?.State.Visible ?? false;
         }
 
         /// <summary>
@@ -360,7 +426,8 @@ namespace Yueby.QuickActions
         /// <returns>Whether checked</returns>
         public static bool GetChecked(string path)
         {
-            return GetActionState(path).IsChecked;
+            var action = GetAction(path);
+            return action?.State.IsChecked ?? false;
         }
 
         /// <summary>
@@ -370,7 +437,89 @@ namespace Yueby.QuickActions
         /// <returns>Whether to show checkmark</returns>
         public static bool GetShowCheckmark(string path)
         {
-            return GetActionState(path).ShowCheckmark;
+            var action = GetAction(path);
+            return action?.State.ShowCheckMark ?? false;
+        }
+
+        /// <summary>
+        /// Set action enabled state
+        /// </summary>
+        /// <param name="path">Action path</param>
+        /// <param name="enabled">Whether enabled</param>
+        public static void SetEnabled(string path, bool enabled)
+        {
+            var action = GetAction(path);
+            if (action != null)
+            {
+                action.State.Enabled = enabled;
+            }
+        }
+
+        /// <summary>
+        /// Get action enabled state
+        /// </summary>
+        /// <param name="path">Action path</param>
+        /// <returns>Whether enabled</returns>
+        public static bool GetEnabled(string path)
+        {
+            var action = GetAction(path);
+            return action?.State.Enabled ?? false;
+        }
+
+        #endregion
+
+        #region Dynamic Action Management
+
+        /// <summary>
+        /// Register a dynamic action
+        /// </summary>
+        /// <param name="path">Action path</param>
+        /// <param name="action">Action method</param>
+        /// <param name="description">Action description</param>
+        /// <param name="priority">Action priority</param>
+        /// <param name="validation">Validation function (optional)</param>
+        public static void RegisterDynamicAction(string path, Action action, string description = null, int priority = 0, Func<bool> validation = null)
+        {
+            var actionInfo = new ActionInfo
+            {
+                Path = path,
+                Name = GetActionName(path),
+                Description = description ?? GetActionName(path),
+                Type = ActionType.Dynamic,
+                DynamicAction = action,
+                DynamicValidation = validation,
+                Priority = priority
+            };
+
+            _registeredActions[path] = actionInfo;
+        }
+
+        /// <summary>
+        /// Unregister a dynamic action
+        /// </summary>
+        /// <param name="path">Action path</param>
+        public static void UnregisterDynamicAction(string path)
+        {
+            if (_registeredActions.TryGetValue(path, out var actionInfo) && actionInfo.Type == ActionType.Dynamic)
+            {
+                _registeredActions.Remove(path);
+            }
+        }
+
+        /// <summary>
+        /// Clear all dynamic actions
+        /// </summary>
+        public static void ClearDynamicActions()
+        {
+            var keysToRemove = _registeredActions
+                .Where(kvp => kvp.Value.Type == ActionType.Dynamic)
+                .Select(kvp => kvp.Key)
+                .ToList();
+
+            foreach (var path in keysToRemove)
+            {
+                _registeredActions.Remove(path);
+            }
         }
 
         #endregion
@@ -440,6 +589,9 @@ namespace Yueby.QuickActions
 
             var mousePosition = GUIUtility.GUIToScreenPoint(evt.mousePosition);
 
+            // Trigger panel opening event
+            OnBeforeOpen?.Invoke();
+
             _actionTree.Refresh();
 
             _currentWindow = QuickActionEditorWindow.ShowWindowAtMousePosition(mousePosition, _actionTree);
@@ -451,6 +603,9 @@ namespace Yueby.QuickActions
             {
                 _currentWindow.Close();
                 _currentWindow = null;
+
+                // Clear all dynamic actions when panel closes
+                ClearDynamicActions();
             }
         }
 

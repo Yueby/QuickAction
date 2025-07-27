@@ -4,6 +4,35 @@ All notable changes to this package will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2025-07-27
+### Added
+- Dynamic Action system for runtime action registration
+- `OnBeforeOpen` event for registering dynamic actions before panel opens
+- `QuickAction.RegisterDynamicAction()` method for programmatic action registration
+- Support for dynamic validation functions using `Func<bool>` delegates
+- Automatic cleanup of dynamic actions when panel closes
+- Component action extensions with `IComponentActionExtension` interface
+- Global window actions for maximize and close functionality
+- Project window actions for folder creation and navigation
+- Hierarchy actions for GameObject creation and management
+- SceneView actions for view controls and alignment
+
+### Changed
+- Refactored action system architecture for better modularity
+- Moved context-specific actions to dedicated files (SceneViewAction, ProjectWindowAction, etc.)
+- Reorganized action paths and categories for better organization
+- Enhanced component management with toggle, remove, and extension support
+- Improved action state management with separate Enabled and Visible states
+- Updated validation system to support both static and dynamic actions
+- Simplified action registration and execution pipeline
+
+### Technical Improvements
+- Introduced `ActionType` enum for static and dynamic action differentiation
+- Optimized `ActionInfo` and `ActionState` structures
+- Enhanced error handling and logging throughout the system
+- Improved performance with better event-driven architecture
+- Added comprehensive documentation for dynamic action usage
+
 ## [1.0.5] - 2025-07-17
 ### Changed
 - Removed useless scripts.

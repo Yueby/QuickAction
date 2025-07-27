@@ -6,12 +6,71 @@ using System.IO;
 namespace Yueby.QuickActions.Actions.Selections
 {
     /// <summary>
-    /// SkinnedMeshRenderer component-related quick actions
+    /// SkinnedMeshRenderer component action extension
     /// </summary>
-    public static class SkinnedMeshRendererAction
+    public class SkinnedMeshRendererActionExtension : IComponentActionExtension
     {
-        [QuickAction("Selection/SkinnedMeshRenderer/Set Bounds To 1", "Set selected SkinnedMeshRenderer bounds to 1x1x1", Priority = -840, ValidateFunction = nameof(ValidateSkinnedMeshRendererSelected))]
-        public static void SetBoundsToOne()
+        public System.Type ComponentType => typeof(SkinnedMeshRenderer);
+        public int Priority => 200;
+
+        public void RegisterCustomActions(Component component, string componentName, string componentKey)
+        {
+            var smr = component as SkinnedMeshRenderer;
+            if (smr == null) return;
+
+            // Basic actions
+            RegisterBasicActions(componentName, componentKey);
+            
+            // BlendShape actions
+            RegisterBlendShapeActions(componentName, componentKey);
+        }
+
+        private void RegisterBasicActions(string componentName, string componentKey)
+        {
+            QuickAction.RegisterDynamicAction(
+                ComponentAction.GetComponentActionPath(componentName, "Set Bounds To 1"),
+                () => SetBoundsToOne(),
+                "Set bounds to 1x1x1",
+                -840
+            );
+        }
+
+        private void RegisterBlendShapeActions(string componentName, string componentKey)
+        {
+            QuickAction.RegisterDynamicAction(
+                ComponentAction.GetComponentActionPath(componentName, "Reset BlendShapes"),
+                () => ResetBlendShapes(),
+                "Reset all BlendShapes to 0",
+                -839
+            );
+
+            QuickAction.RegisterDynamicAction(
+                ComponentAction.GetComponentActionPath(componentName, "Create Animation Clip"),
+                () => CreateAnimationClip(),
+                "Create animation clip from current BlendShape state",
+                -838,
+                () => Selection.gameObjects.Length == 1
+            );
+
+            QuickAction.RegisterDynamicAction(
+                ComponentAction.GetComponentActionPath(componentName, "Copy BlendShapes"),
+                () => CopyBlendShapes(),
+                "Copy BlendShape weights to clipboard",
+                -837,
+                () => Selection.gameObjects.Length == 1
+            );
+
+            QuickAction.RegisterDynamicAction(
+                ComponentAction.GetComponentActionPath(componentName, "Paste BlendShapes"),
+                () => PasteBlendShapes(),
+                "Paste BlendShape weights from clipboard",
+                -836
+            );
+        }
+
+        #region Action Implementations
+
+        private void SetBoundsToOne()
         {
             foreach (var obj in Selection.gameObjects)
             {
@@ -28,8 +87,7 @@ namespace Yueby.QuickActions.Actions.Selections
             Logger.Info($"Set bounds to one for {Selection.gameObjects.Length} SkinnedMeshRenderer(s)");
         }
 
-        [QuickAction("Selection/SkinnedMeshRenderer/Reset BlendShapes", "Reset all BlendShapes of selected SkinnedMeshRenderer to 0", Priority = -839, ValidateFunction = nameof(ValidateSkinnedMeshRendererSelected))]
-        public static void ResetBlendShapes()
+        private void ResetBlendShapes()
         {
             int totalResetCount = 0;
 
@@ -59,8 +117,7 @@ namespace Yueby.QuickActions.Actions.Selections
             Logger.Info($"Reset {totalResetCount} BlendShape(s) on {Selection.gameObjects.Length} SkinnedMeshRenderer(s)");
         }
 
-        [QuickAction("Selection/SkinnedMeshRenderer/Create Animation Clip", "Create animation clip from current BlendShape state", Priority = -838, ValidateFunction = nameof(ValidateSingleSkinnedMeshRendererSelected))]
-        public static void CreateAnimationClip()
+        private void CreateAnimationClip()
         {
             if (!Selection.activeGameObject.TryGetComponent<SkinnedMeshRenderer>(out var smr))
             {
@@ -90,7 +147,6 @@ namespace Yueby.QuickActions.Actions.Selections
                 return;
             }
 
-            // Open dialog to select file path
             var filePath = EditorUtility.SaveFilePanel("Create Animation Clip", Application.dataPath, smr.name + " BlendShapes", "anim");
             if (string.IsNullOrEmpty(filePath))
             {
@@ -98,14 +154,12 @@ namespace Yueby.QuickActions.Actions.Selections
                 return;
             }
 
-            // Make sure the file path directory exists
             var directory = Path.GetDirectoryName(filePath);
             if (!Directory.Exists(directory))
             {
                 Directory.CreateDirectory(directory);
             }
 
-            // Create the animation clip
             var clip = new AnimationClip();
             foreach (var blendShape in validBlendShapesMap)
             {
@@ -123,19 +177,15 @@ namespace Yueby.QuickActions.Actions.Selections
             }
 
             var relativePath = FileUtil.GetProjectRelativePath(filePath);
-
-            // Create the animation clip as asset
             AssetDatabase.CreateAsset(clip, relativePath);
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
 
-            // Ping object
             EditorGUIUtility.PingObject(clip);
             Logger.Info($"Created animation clip with {validBlendShapesMap.Count} BlendShape(s): {relativePath}");
         }
 
-        [QuickAction("Selection/SkinnedMeshRenderer/Copy BlendShapes", "Copy BlendShape weights from selected SkinnedMeshRenderer", Priority = -837, ValidateFunction = nameof(ValidateSingleSkinnedMeshRendererSelected))]
-        public static void CopyBlendShapes()
+        private void CopyBlendShapes()
         {
             if (!Selection.activeGameObject.TryGetComponent<SkinnedMeshRenderer>(out var smr))
             {
@@ -162,8 +212,7 @@ namespace Yueby.QuickActions.Actions.Selections
             Logger.Info($"Copied {blendShapeData.weights.Count} BlendShape weights to clipboard");
         }
 
-        [QuickAction("Selection/SkinnedMeshRenderer/Paste BlendShapes", "Paste BlendShape weights to selected SkinnedMeshRenderer", Priority = -836, ValidateFunction = nameof(ValidateSkinnedMeshRendererSelected))]
-        public static void PasteBlendShapes()
+        private void PasteBlendShapes()
         {
             try
             {
@@ -195,7 +244,6 @@ namespace Yueby.QuickActions.Actions.Selections
 
                     foreach (var weightData in blendShapeData.weights)
                     {
-                        // Find blend shape by name
                         for (int i = 0; i < smr.sharedMesh.blendShapeCount; i++)
                         {
                             if (smr.sharedMesh.GetBlendShapeName(i) == weightData.name)
@@ -216,56 +264,10 @@ namespace Yueby.QuickActions.Actions.Selections
             }
         }
 
-        #region Validation Methods
-
-        /// <summary>
-        /// Validate if a GameObject with SkinnedMeshRenderer component is selected
-        /// </summary>
-        private static bool ValidateSkinnedMeshRendererSelected()
-        {
-            bool hasSkinnedMeshRenderer = false;
-
-            if (Selection.gameObjects.Length > 0)
-            {
-                foreach (var obj in Selection.gameObjects)
-                {
-                    if (obj.TryGetComponent<SkinnedMeshRenderer>(out _))
-                    {
-                        hasSkinnedMeshRenderer = true;
-                        break;
-                    }
-                }
-            }
-
-            QuickAction.SetVisible("Selection/SkinnedMeshRenderer/Set Bounds To 1", hasSkinnedMeshRenderer);
-            QuickAction.SetVisible("Selection/SkinnedMeshRenderer/Reset BlendShapes", hasSkinnedMeshRenderer);
-            QuickAction.SetVisible("Selection/SkinnedMeshRenderer/Paste BlendShapes", hasSkinnedMeshRenderer);
-
-            return hasSkinnedMeshRenderer;
-        }
-
-        /// <summary>
-        /// Validate if only one GameObject with SkinnedMeshRenderer component is selected
-        /// </summary>
-        private static bool ValidateSingleSkinnedMeshRendererSelected()
-        {
-            bool hasSingleSkinnedMeshRenderer = Selection.gameObjects.Length == 1 &&
-                   Selection.activeGameObject != null &&
-                   Selection.activeGameObject.TryGetComponent<SkinnedMeshRenderer>(out _);
-
-            QuickAction.SetVisible("Selection/SkinnedMeshRenderer/Create Animation Clip", hasSingleSkinnedMeshRenderer);
-            QuickAction.SetVisible("Selection/SkinnedMeshRenderer/Copy BlendShapes", hasSingleSkinnedMeshRenderer);
-
-            return hasSingleSkinnedMeshRenderer;
-        }
-
         #endregion
 
         #region Helper Methods
 
-        /// <summary>
-        /// Get relative path of Transform (for animation binding)
-        /// </summary>
         private static string GetRelativePath(Transform transform)
         {
             var path = "";
@@ -288,18 +290,12 @@ namespace Yueby.QuickActions.Actions.Selections
 
         #region Helper Classes
 
-        /// <summary>
-        /// BlendShape data structure for copy and paste
-        /// </summary>
         [System.Serializable]
         private class BlendShapeData
         {
             public List<BlendShapeWeight> weights = new List<BlendShapeWeight>();
         }
 
-        /// <summary>
-        /// BlendShape weight data
-        /// </summary>
         [System.Serializable]
         private class BlendShapeWeight
         {
@@ -309,4 +305,4 @@ namespace Yueby.QuickActions.Actions.Selections
 
         #endregion
     }
-}
+} 

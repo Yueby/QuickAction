@@ -9,41 +9,7 @@ namespace Yueby.QuickActions.Actions.Selections
     /// </summary>
     public static class AssetAction
     {
-        [QuickAction("Selection/Duplicate Asset", "Duplicate selected Asset file", Priority = -900, ValidateFunction = nameof(ValidateAssetSelected))]
-        public static void DuplicateAsset()
-        {
-            if (Selection.activeObject != null)
-            {
-                string assetPath = AssetDatabase.GetAssetPath(Selection.activeObject);
-                if (!string.IsNullOrEmpty(assetPath))
-                {
-                    string newPath = AssetDatabase.GenerateUniqueAssetPath(assetPath);
-                    AssetDatabase.CopyAsset(assetPath, newPath);
-                    AssetDatabase.Refresh();
 
-                    var newAsset = AssetDatabase.LoadAssetAtPath<Object>(newPath);
-                    Selection.activeObject = newAsset;
-                    EditorGUIUtility.PingObject(newAsset);
-                }
-            }
-        }
-
-        [QuickAction("Selection/Delete Asset", "Delete selected Asset file", Priority = -899, ValidateFunction = nameof(ValidateAssetSelected))]
-        public static void DeleteAsset()
-        {
-            if (Selection.activeObject != null)
-            {
-                string assetPath = AssetDatabase.GetAssetPath(Selection.activeObject);
-                if (!string.IsNullOrEmpty(assetPath))
-                {
-                    if (EditorUtility.DisplayDialog("Delete Asset", $"Are you sure you want to delete {Path.GetFileName(assetPath)}?", "Delete", "Cancel"))
-                    {
-                        AssetDatabase.DeleteAsset(assetPath);
-                        AssetDatabase.Refresh();
-                    }
-                }
-            }
-        }
 
         [QuickAction("Selection/Show in Explorer", "Show selected Asset in file explorer", Priority = -898, ValidateFunction = nameof(ValidateAssetSelected))]
         public static void ShowInExplorer()
@@ -100,8 +66,6 @@ namespace Yueby.QuickActions.Actions.Selections
         {
             bool hasAssetSelected = Selection.activeObject != null && AssetDatabase.Contains(Selection.activeObject);
 
-            QuickAction.SetVisible("Selection/Duplicate Asset", hasAssetSelected);
-            QuickAction.SetVisible("Selection/Delete Asset", hasAssetSelected);
             QuickAction.SetVisible("Selection/Show in Explorer", hasAssetSelected);
             QuickAction.SetVisible("Selection/Copy Path", hasAssetSelected);
             QuickAction.SetVisible("Selection/Copy GUID", hasAssetSelected);

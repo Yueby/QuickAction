@@ -16,6 +16,7 @@
 - **状态管理**: 可视化状态指示器（选中/未选中，可见/隐藏）
 - **优先级系统**: 通过优先级值控制操作显示顺序
 - **简易集成**: 基于特性的简单操作注册
+- **动态指令**: 在运行时以编程方式注册指令，实现上下文感知功能
 
 ## 快速开始
 
@@ -122,6 +123,55 @@ public class MyActions
 - `QuickAction.GetVisible(path)`: 获取可见性状态
 - `QuickAction.GetChecked(path)`: 获取选中状态
 
+### 动态指令
+
+动态指令允许您在运行时以编程方式注册指令，非常适合上下文感知功能：
+
+```csharp
+// 注册动态指令
+QuickAction.RegisterDynamicAction(
+    "Selection/Component/Copy", 
+    () => CopyComponent(), 
+    "复制选中的组件", 
+    -100
+);
+```
+
+**动态指令特性：**
+- **运行时注册**: 在面板打开时添加指令
+- **自动清理**: 面板关闭时自动移除指令
+- **上下文感知**: 非常适合依赖于当前选择的指令
+
+**使用方式：**
+```csharp
+// 注册事件（在类初始化时）
+[InitializeOnLoadMethod]
+private static void RegisterDynamicActions()
+{
+    QuickAction.OnBeforeOpen += OnQuickActionOpen;
+}
+
+// 在事件中注册动态指令
+private static void OnQuickActionOpen()
+{
+    QuickAction.RegisterDynamicAction(
+        "路径/指令名称", 
+        () => { /* 指令逻辑 */ }, 
+        "指令描述", 
+        优先级
+    );
+}
+
+// 带验证的动态指令
+QuickAction.RegisterDynamicAction(
+    "路径/指令名称", 
+    () => { /* 指令逻辑 */ }, 
+    "指令描述", 
+    优先级,
+    () => { /* 验证逻辑，返回bool */ }
+);
+```
+
 ## 示例
 
 ### 基础操作
@@ -133,21 +183,18 @@ using Yueby.QuickActions;
 
 public class BasicActions
 {
-    [QuickAction("Debug/Clear Console", "清空控制台窗口")]
-    public static void ClearConsole()
+    [QuickAction("Debug/Hello World", "显示问候消息")]
+    public static void HelloWorld()
     {
-        var assembly = System.Reflection.Assembly.GetAssembly(typeof(SceneView));
-        var type = assembly.GetType("UnityEditor.LogEntries");
-        var method = type.GetMethod("Clear");
-        method.Invoke(new object(), null);
+        Debug.Log("Hello from Quick Action!");
     }
     
-    [QuickAction("GameObject/Create Empty at Origin", "在世界原点创建空GameObject")]
-    public static void CreateEmptyAtOrigin()
+    [QuickAction("GameObject/Create Cube", "在场景中创建立方体")]
+    public static void CreateCube()
     {
-        var go = new GameObject("空GameObject");
-        go.transform.position = Vector3.zero;
-        Selection.activeGameObject = go;
+        var cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        cube.name = "Quick Action Cube";
+        Selection.activeGameObject = cube;
     }
 }
 ```
@@ -267,6 +314,74 @@ public class HierarchicalActions
     }
 }
 ```
+
+### 动态组件指令
+
+动态指令非常适合上下文感知指令，如组件管理：
+
+```csharp
+using UnityEngine;
+using UnityEditor;
+using Yueby.QuickActions;
+
+public class ComponentActions
+{
+    [InitializeOnLoadMethod]
+    private static void RegisterDynamicActions()
+    {
+        QuickAction.OnBeforeOpen += OnQuickActionOpen;
+    }
+
+    private static void OnQuickActionOpen()
+    {
+        if (Selection.activeGameObject != null)
+        {
+            var components = Selection.activeGameObject.GetComponents<Component>();
+            
+            foreach (var component in components)
+            {
+                if (component == null) continue;
+                
+                var componentName = component.GetType().Name;
+                var componentKey = $"{componentName}_{component.GetInstanceID()}";
+                
+                // 为每个组件注册复制和移除操作
+                QuickAction.RegisterDynamicAction(
+                    $"Selection/Component/{componentName}/Copy",
+                    () => CopyComponent(componentKey),
+                    $"复制{componentName}组件",
+                    -850
+                );
+                
+                QuickAction.RegisterDynamicAction(
+                    $"Selection/Component/{componentName}/Remove",
+                    () => RemoveComponent(componentKey),
+                    $"移除{componentName}组件",
+                    -849
+                );
+            }
+        }
+    }
+
+    private static void CopyComponent(string componentKey)
+    {
+        // 复制组件的实现
+        Debug.Log($"已复制组件: {componentKey}");
+    }
+
+    private static void RemoveComponent(string componentKey)
+    {
+        // 移除组件的实现
+        Debug.Log($"已移除组件: {componentKey}");
+    }
+}
+```
+
+**主要优势：**
+- **自动上下文检测**: 根据当前选择创建指令
+- **临时指令**: 面板关闭时自动清理指令
+- **可扩展**: 适用于任意数量的组件或对象
+- **性能优化**: 仅在需要时创建指令
 
 ## SceneView集成
 

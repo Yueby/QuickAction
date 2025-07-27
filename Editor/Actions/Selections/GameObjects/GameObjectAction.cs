@@ -58,6 +58,26 @@ namespace Yueby.QuickActions.Actions.Selections
             }
         }
 
+        [QuickAction("Selection/Align View to Selected", "Align View to Selected", Priority = -875, ValidateFunction = nameof(ValidateGameObjectSelected))]
+        public static void AlignViewToSelected()
+        {
+            if (Selection.activeGameObject != null)
+            {
+                SceneView.lastActiveSceneView.AlignViewToObject(Selection.activeGameObject.transform);
+            }
+        }
+
+        [QuickAction("Selection/Align Selected to View", "Align Selected to View", Priority = -874, ValidateFunction = nameof(ValidateGameObjectSelected))]
+        public static void AlignSelectedToView()
+        {
+            if (Selection.activeGameObject != null && SceneView.lastActiveSceneView != null)
+            {
+                Undo.RecordObject(Selection.activeGameObject.transform, "Align Selected to View");
+                Selection.activeGameObject.transform.position = SceneView.lastActiveSceneView.camera.transform.position;
+                Selection.activeGameObject.transform.rotation = SceneView.lastActiveSceneView.camera.transform.rotation;
+            }
+        }
+
         #region Validation Methods
 
         /// <summary>
@@ -70,6 +90,8 @@ namespace Yueby.QuickActions.Actions.Selections
             QuickAction.SetVisible("Selection/Duplicate", hasGameObjectSelected);
             QuickAction.SetVisible("Selection/Delete", hasGameObjectSelected);
             QuickAction.SetVisible("Selection/Focus", hasGameObjectSelected);
+            QuickAction.SetVisible("Selection/Align View to Selected", hasGameObjectSelected);
+            QuickAction.SetVisible("Selection/Align Selected to View", hasGameObjectSelected);
 
             return hasGameObjectSelected;
         }

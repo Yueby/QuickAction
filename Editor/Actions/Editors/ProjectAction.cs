@@ -9,20 +9,6 @@ namespace Yueby.QuickActions.Actions
     /// </summary>
     public static class ProjectAction
     {
-        
-        [QuickAction("Editor/Project/Save Project", "Save Project", Priority = -957)]
-        public static void SaveProject()
-        {
-            AssetDatabase.SaveAssets();
-            Logger.Info("Project saved successfully");
-        }
-
-        [QuickAction("Editor/Project/Refresh", "Refresh Asset Database", Priority = -956)]
-        public static void RefreshAssetDatabase()
-        {
-            AssetDatabase.Refresh();
-            Logger.Info("Asset database refreshed successfully");
-        }
 
         [QuickAction("Editor/Project/Open Persistent Data Path", "Open Persistent Data Path", Priority = -955)]
         public static void OpenPersistentDataPath()

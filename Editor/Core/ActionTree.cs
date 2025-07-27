@@ -35,8 +35,8 @@ namespace Yueby.QuickActions
         public Texture2D Icon { get; set; }
         public int Priority { get; set; }
         public int CurrentPageIndex { get; set; } = 0; // Page index state for this node
-        public bool IsChecked { get; set; } = false; // 选中状态
-        public bool ShowCheckmark { get; set; } = false; // 是否显示checkmark
+        public bool IsChecked { get; set; } = false; // Checked state
+        public bool ShowCheckMark { get; set; } = false; // Whether to show checkmark
 
         public bool IsLeaf => Children.Count == 0;
         public bool IsRoot => Parent == null;
@@ -211,14 +211,13 @@ namespace Yueby.QuickActions
             var actionsToShow = Mathf.Min(MaxButtonsPerPage, totalActions - startIndex);
             var availableActions = _currentNode.Children.Skip(startIndex).Take(actionsToShow).ToList();
 
-            // 更新每个动作的选中状态
+            // Update checked state for each action
             foreach (var action in availableActions)
             {
                 if (action.Type == ActionNodeType.Action && action.ActionInfo != null)
                 {
-                    var state = QuickAction.GetActionState(action.ActionInfo.Path);
-                    action.IsChecked = state.IsChecked;
-                    action.ShowCheckmark = state.ShowCheckmark;
+                    action.IsChecked = action.ActionInfo.State.IsChecked;
+                    action.ShowCheckMark = action.ActionInfo.State.ShowCheckMark;
                 }
             }
 
